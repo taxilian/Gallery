@@ -37,6 +37,11 @@
   [self.view addSubview:self.tableView];
 }
 
+- (void)viewWillAppear:(BOOL)animated
+{
+  self.tableView.frame = self.view.bounds;
+}
+
 #pragma mark Datasource
 
 - (UITableViewCell *)tableView:(UITableView *)aTableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -55,6 +60,10 @@
     {
       cell.accessoryType = UITableViewCellAccessoryCheckmark;
       self.selectedIndexPath = indexPath;
+    }
+    else
+    {
+      cell.accessoryType = UITableViewCellAccessoryNone;
     }
   }
   

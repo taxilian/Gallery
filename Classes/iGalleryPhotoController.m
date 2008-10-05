@@ -34,6 +34,7 @@
 
 - (IBAction)upload:(id)sender
 {
+  NSError *error;
   UIToolbar *uploadStatusToolbar = [[UIToolbar alloc] init];
   float progressIncrements = 1.0 / 5.0;
 
@@ -97,12 +98,42 @@
   [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
   
   Gallery *gallery = [[Gallery alloc] initWithGalleryURL:galleryURL];
-  NSDictionary *resultDictionary = [gallery sendSynchronousCommand:[NSDictionary dictionaryWithObjectsAndKeys:galleryPassword, @"password", galleryUsername, @"uname", @"login", @"cmd", nil]];
+  NSDictionary *resultDictionary = [gallery sendSynchronousCommand:[NSDictionary dictionaryWithObjectsAndKeys:galleryPassword, @"password", galleryUsername, @"uname", @"login", @"cmd", nil] error:&error];
+  NSLog(@"result %@, error %@", resultDictionary, error);
+  
+  if (error)
+  {
+    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Connection Error" message:[[error localizedDescription] capitalizedString] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
+    [alert show];
+    
+    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
+    
+    // Get rid of our toolbar now
+    [UIView beginAnimations:@"ToolbarHide" context:(void*)uploadStatusToolbar];
+    [UIView setAnimationDuration:0.25];
+    [UIView setAnimationDelegate:self];
+    [UIView setAnimationDidStopSelector:@selector(animationDidStop:context:)];
+    uploadStatusToolbar.alpha = 0.0;
+    [UIView commitAnimations];
+    
+    return;
+  }
+  
   if ([[resultDictionary valueForKey:@"status"] intValue] != 0)
   {
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Gallery Error" message:[resultDictionary valueForKey:@"status_text"] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
     [alert show];
+
     [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
+    
+    // Get rid of our toolbar now
+    [UIView beginAnimations:@"ToolbarHide" context:(void*)uploadStatusToolbar];
+    [UIView setAnimationDuration:0.25];
+    [UIView setAnimationDelegate:self];
+    [UIView setAnimationDidStopSelector:@selector(animationDidStop:context:)];
+    uploadStatusToolbar.alpha = 0.0;
+    [UIView commitAnimations];
+    
     return;
   }
   
@@ -116,7 +147,26 @@
   progressTextView.progressView.progress += progressIncrements;
   [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
   
-  resultDictionary = [gallery sendSynchronousCommand:[NSDictionary dictionaryWithObjectsAndKeys:rotatedImage, @"g2_userfile", galleryID, @"set_albumName", @"add-item", @"cmd", nil]];
+  resultDictionary = [gallery sendSynchronousCommand:[NSDictionary dictionaryWithObjectsAndKeys:rotatedImage, @"g2_userfile", galleryID, @"set_albumName", @"add-item", @"cmd", nil] error:&error];
+  
+  if (error)
+  {
+    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Connection Error" message:[[error localizedDescription] capitalizedString] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
+    [alert show];
+    
+    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
+    
+    // Get rid of our toolbar now
+    [UIView beginAnimations:@"ToolbarHide" context:(void*)uploadStatusToolbar];
+    [UIView setAnimationDuration:0.25];
+    [UIView setAnimationDelegate:self];
+    [UIView setAnimationDidStopSelector:@selector(animationDidStop:context:)];
+    uploadStatusToolbar.alpha = 0.0;
+    [UIView commitAnimations];
+    
+    return;
+  }
+  
   if ([[resultDictionary valueForKey:@"status"] intValue] != 0)
   {
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Gallery Error" message:[resultDictionary valueForKey:@"status_text"] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
@@ -125,7 +175,6 @@
     return;
   }
   
-  self.navigationItem.prompt = nil;
   [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
 
   // Get rid of our toolbar now

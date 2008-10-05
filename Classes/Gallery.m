@@ -22,7 +22,7 @@
   return self;
 }
 
-- (id)sendSynchronousCommand:(NSDictionary*)formData
+- (id)sendSynchronousCommand:(NSDictionary*)formData error:(NSError**)error
 {
   [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
   
@@ -80,13 +80,18 @@
   [cmdTokenData appendData:[[NSString stringWithFormat:@"--%@\r\n", mimeBoundary] dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
   
   NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:self.galleryURL]];
+  if (!request)
+  {
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    return nil;
+  }
   
   [request setValue:[NSString stringWithFormat:@"%d", [cmdTokenData length]] forHTTPHeaderField:@"Content-Length"];
   [request setValue:[NSString stringWithFormat:@"multipart/form-data; boundary=%@", mimeBoundary] forHTTPHeaderField:@"Content-Type"];
   [request setHTTPMethod:@"POST"];
   [request setHTTPBody:cmdTokenData];
   
-  NSData *connectionData = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
+  NSData *connectionData = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:error];
   NSString *connectionReturnString = [[[NSString alloc] initWithData:connectionData encoding:NSASCIIStringEncoding] autorelease];
     
   NSArray *cmdTokenArray = [connectionReturnString componentsSeparatedByString:@"\n"];
@@ -97,7 +102,11 @@
     NSArray *split = [token componentsSeparatedByString:@"="];
     if (split.count > 1)
     {
-      [mutableFormData setObject:[split objectAtIndex:1] forKey:[split objectAtIndex:0]];
+      NSString *value = [split objectAtIndex:1];
+      // Fine this is wrong...so sue me
+      value = [value stringByReplacingOccurrencesOfString:@"\\" withString:@""];
+      
+      [mutableFormData setObject:value forKey:[split objectAtIndex:0]];
     }
   }
   

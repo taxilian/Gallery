@@ -18,6 +18,6 @@
 
 - (id)initWithGalleryURL:(NSString*)url;
 
-- (id)sendSynchronousCommand:(NSDictionary*)formData;
+- (id)sendSynchronousCommand:(NSDictionary*)formData error:(NSError**)error;
 
 @end

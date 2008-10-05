@@ -35,6 +35,9 @@
 - (void)loadView {
   [super loadView];
   
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willShowKeyboard:) name:@"UIKeyboardWillShowNotification" object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willHideKeyboard:) name:@"UIKeyboardWillHideNotification" object:nil];
+  
   self.title = @"Settings";
   self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)];
   
@@ -43,7 +46,7 @@
   self.tableView.dataSource = self;
   self.tableView.delegate = self;
   
-  UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
+  scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
   scrollView.contentSize = self.tableView.bounds.size;
   scrollView.showsVerticalScrollIndicator = YES;
   
@@ -54,6 +57,7 @@
 
 - (IBAction)connect:(id)sender
 {
+  NSError *error;
   UIActivityIndicatorView *loadingIndicator = [[[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 25, 25)] autorelease];
   [loadingIndicator startAnimating];
   [loadingIndicator sizeToFit];
@@ -88,7 +92,16 @@
   }
   
   Gallery *gallery = [[Gallery alloc] initWithGalleryURL:url];
-  NSDictionary *returnData = [gallery sendSynchronousCommand:[NSDictionary dictionaryWithObjectsAndKeys:password, @"password", username, @"uname", @"login", @"cmd", nil]];
+  NSDictionary *returnData = [gallery sendSynchronousCommand:[NSDictionary dictionaryWithObjectsAndKeys:password, @"password", username, @"uname", @"login", @"cmd", nil] error:&error];
+  
+  if (error)
+  {
+    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Connection Error" message:[[error localizedDescription] capitalizedString] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
+    [alert show];
+    
+    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];      
+    return;
+  }
   
   if ([[returnData valueForKey:@"status"] intValue] != 0)
   {
@@ -99,7 +112,24 @@
     return;
   }
 
-  returnData = [gallery sendSynchronousCommand:[NSDictionary dictionaryWithObjectsAndKeys:@"yes", @"no_perms", @"fetch-albums-prune", @"cmd", nil]];
+  returnData = [gallery sendSynchronousCommand:[NSDictionary dictionaryWithObjectsAndKeys:@"yes", @"no_perms", @"fetch-albums-prune", @"cmd", nil] error:&error];
+  if (error)
+  {
+    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Connection Error" message:[[error localizedDescription] capitalizedString] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
+    [alert show];
+    
+    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];      
+    return;
+  }
+  
+  if ([[returnData valueForKey:@"status"] intValue] != 0)
+  {
+    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Unable to login" message:[returnData valueForKey:@"status_text"] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
+    [alert show];
+    
+    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];
+    return;
+  }
   
   int albumCount = [[returnData valueForKey:@"album_count"] intValue];
   int currentAlbum;
@@ -113,9 +143,7 @@
     [albumData setValue:[returnData valueForKey:[NSString stringWithFormat:@"album.parent.%d", currentAlbum]] forKey:@"parent"];
     albums = [albums arrayByAddingObject:albumData];
   }
-  
-  NSLog(@"%@", albums);
-  
+    
   self.albumArray = albums;
   [tableView reloadData];
   
@@ -125,6 +153,34 @@
 - (IBAction)albumView:(id)sender
 {
 
+}
+
+#pragma mark Keyboard Notifications
+
+- (void)willShowKeyboard:(NSNotification*)notification
+{
+  NSLog(@"Show");
+  CGRect keyboardBounds;
+  CGRect scrollViewBounds = [scrollView bounds];
+  
+  NSValue *boundsValue = [[notification userInfo] objectForKey:UIKeyboardBoundsUserInfoKey];
+  [boundsValue getValue:&keyboardBounds];
+  
+  scrollViewBounds.size.height -= keyboardBounds.size.height;
+  
+  [UIView beginAnimations:nil context:nil];
+  [UIView setAnimationDuration:0.25];
+  tableView.frame = scrollViewBounds;
+  [UIView commitAnimations];
+}
+
+- (void)willHideKeyboard:(NSNotification*)notification
+{
+  NSLog(@"Hide");
+  [UIView beginAnimations:nil context:nil];
+  [UIView setAnimationDuration:0.25];
+  tableView.frame = self.view.bounds;
+  [UIView commitAnimations];  
 }
 
 #pragma mark Tableview Datasource

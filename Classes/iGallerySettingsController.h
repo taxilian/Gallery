@@ -11,6 +11,8 @@
 
 @interface iGallerySettingsController : UIViewController <UITableViewDataSource, UITextFieldDelegate, UITableViewDelegate> {
   UITableView *tableView;
+  UIScrollView *scrollView;
+  
   NSArray *albumArray;
 }
 
@@ -21,5 +23,8 @@
 - (IBAction)albumView:(id)sender;
 
 - (void)update;
+
+- (void)willShowKeyboard:(NSNotification*)notification;
+- (void)willHideKeyboard:(NSNotification*)notification;
 
 @end
