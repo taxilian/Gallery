@@ -7,5 +7,7 @@
 @property (nonatomic, copy) NSString *placeholder;
 @property (nonatomic, getter=isSecureTextEntry) BOOL secureTextEntry;
 @property (nonatomic, assign) UIKeyboardType keyboardType;
+@property (nonatomic, assign) UITextAutocapitalizationType autocapitalizationType;
+@property (nonatomic, assign) UITextAutocorrectionType autocorrectionType;
 @property (nonatomic, readonly) UITextField *textField;
 @end

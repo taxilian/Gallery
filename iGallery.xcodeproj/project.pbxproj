@@ -14,11 +14,14 @@
 		28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD733E0D9D9553002E5188 /* MainWindow.xib */; };
 		C91C9F420E97FD0D00E4D1A0 /* iGalleryPhotoController.m in Sources */ = {isa = PBXBuildFile; fileRef = C91C9F410E97FD0D00E4D1A0 /* iGalleryPhotoController.m */; };
 		C91C9F590E97FE4300E4D1A0 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C91C9F580E97FE4300E4D1A0 /* CoreGraphics.framework */; };
-		C91C9FCF0E9804B100E4D1A0 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = C91C9FCE0E9804B100E4D1A0 /* Settings.bundle */; };
 		C952C04B0E981FDD0080865F /* Gallery.m in Sources */ = {isa = PBXBuildFile; fileRef = C952C04A0E981FDD0080865F /* Gallery.m */; };
 		C952C1190E982FC80080865F /* RapportEditor2.png in Resources */ = {isa = PBXBuildFile; fileRef = C952C1180E982FC80080865F /* RapportEditor2.png */; };
 		C952C2990E984F610080865F /* iGallerySettingsController.m in Sources */ = {isa = PBXBuildFile; fileRef = C952C2980E984F610080865F /* iGallerySettingsController.m */; };
 		C952C2EB0E9853710080865F /* CQPreferencesTextCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C952C2EA0E9853710080865F /* CQPreferencesTextCell.m */; };
+		C952C5810E98DF790080865F /* iGalleryAlbumController.m in Sources */ = {isa = PBXBuildFile; fileRef = C952C5800E98DF790080865F /* iGalleryAlbumController.m */; };
+		C952C6D40E98FDBC0080865F /* ProgressTextBarView.m in Sources */ = {isa = PBXBuildFile; fileRef = C952C6D30E98FDBC0080865F /* ProgressTextBarView.m */; };
+		C952C9240E993ED40080865F /* UIImage+Extras.m in Sources */ = {isa = PBXBuildFile; fileRef = C952C9230E993ED40080865F /* UIImage+Extras.m */; };
+		C952C9C70E9951C40080865F /* iGallery.png in Resources */ = {isa = PBXBuildFile; fileRef = C952C9C60E9951C40080865F /* iGallery.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,7 +37,6 @@
 		C91C9F400E97FD0D00E4D1A0 /* iGalleryPhotoController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iGalleryPhotoController.h; sourceTree = "<group>"; };
 		C91C9F410E97FD0D00E4D1A0 /* iGalleryPhotoController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iGalleryPhotoController.m; sourceTree = "<group>"; };
 		C91C9F580E97FE4300E4D1A0 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		C91C9FCE0E9804B100E4D1A0 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		C952C0490E981FDD0080865F /* Gallery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Gallery.h; sourceTree = "<group>"; };
 		C952C04A0E981FDD0080865F /* Gallery.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Gallery.m; sourceTree = "<group>"; };
 		C952C1180E982FC80080865F /* RapportEditor2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = RapportEditor2.png; sourceTree = "<group>"; };
@@ -42,6 +44,13 @@
 		C952C2980E984F610080865F /* iGallerySettingsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iGallerySettingsController.m; sourceTree = "<group>"; };
 		C952C2E90E9853710080865F /* CQPreferencesTextCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CQPreferencesTextCell.h; sourceTree = "<group>"; };
 		C952C2EA0E9853710080865F /* CQPreferencesTextCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CQPreferencesTextCell.m; sourceTree = "<group>"; };
+		C952C57F0E98DF790080865F /* iGalleryAlbumController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iGalleryAlbumController.h; sourceTree = "<group>"; };
+		C952C5800E98DF790080865F /* iGalleryAlbumController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iGalleryAlbumController.m; sourceTree = "<group>"; };
+		C952C6D20E98FDBC0080865F /* ProgressTextBarView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgressTextBarView.h; sourceTree = "<group>"; };
+		C952C6D30E98FDBC0080865F /* ProgressTextBarView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgressTextBarView.m; sourceTree = "<group>"; };
+		C952C9220E993ED40080865F /* UIImage+Extras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Extras.h"; sourceTree = "<group>"; };
+		C952C9230E993ED40080865F /* UIImage+Extras.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Extras.m"; sourceTree = "<group>"; };
+		C952C9C60E9951C40080865F /* iGallery.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = iGallery.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +80,12 @@
 				C952C04A0E981FDD0080865F /* Gallery.m */,
 				C952C2E90E9853710080865F /* CQPreferencesTextCell.h */,
 				C952C2EA0E9853710080865F /* CQPreferencesTextCell.m */,
+				C952C57F0E98DF790080865F /* iGalleryAlbumController.h */,
+				C952C5800E98DF790080865F /* iGalleryAlbumController.m */,
+				C952C6D20E98FDBC0080865F /* ProgressTextBarView.h */,
+				C952C6D30E98FDBC0080865F /* ProgressTextBarView.m */,
+				C952C9220E993ED40080865F /* UIImage+Extras.h */,
+				C952C9230E993ED40080865F /* UIImage+Extras.m */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -109,7 +124,7 @@
 			children = (
 				C952C1180E982FC80080865F /* RapportEditor2.png */,
 				28AD733E0D9D9553002E5188 /* MainWindow.xib */,
-				C91C9FCE0E9804B100E4D1A0 /* Settings.bundle */,
+				C952C9C60E9951C40080865F /* iGallery.png */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 			);
 			name = Resources;
@@ -168,8 +183,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */,
-				C91C9FCF0E9804B100E4D1A0 /* Settings.bundle in Resources */,
 				C952C1190E982FC80080865F /* RapportEditor2.png in Resources */,
+				C952C9C70E9951C40080865F /* iGallery.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -186,6 +201,9 @@
 				C952C04B0E981FDD0080865F /* Gallery.m in Sources */,
 				C952C2990E984F610080865F /* iGallerySettingsController.m in Sources */,
 				C952C2EB0E9853710080865F /* CQPreferencesTextCell.m in Sources */,
+				C952C5810E98DF790080865F /* iGalleryAlbumController.m in Sources */,
+				C952C6D40E98FDBC0080865F /* ProgressTextBarView.m in Sources */,
+				C952C9240E993ED40080865F /* UIImage+Extras.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

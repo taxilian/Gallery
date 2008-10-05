@@ -9,12 +9,17 @@
 #import <UIKit/UIKit.h>
 
 
-@interface iGallerySettingsController : UIViewController <UITableViewDataSource> {
+@interface iGallerySettingsController : UIViewController <UITableViewDataSource, UITextFieldDelegate, UITableViewDelegate> {
   UITableView *tableView;
+  NSArray *albumArray;
 }
 
 @property (nonatomic, retain) UITableView *tableView;
+@property (nonatomic, retain) NSArray *albumArray;
 
 - (IBAction)connect:(id)sender;
+- (IBAction)albumView:(id)sender;
+
+- (void)update;
 
 @end

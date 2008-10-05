@@ -79,6 +79,26 @@
   _textField.keyboardType = type;
 }
 
+- (UITextAutocapitalizationType) autocapitalizationType
+{
+  return _textField.autocapitalizationType;
+}
+
+- (void) setAutocapitalizationType:(UITextAutocapitalizationType)type
+{
+  _textField.autocapitalizationType = type;
+}
+
+- (UITextAutocorrectionType) autocorrectionType
+{
+  return _textField.autocorrectionType;
+}
+
+- (void)setAutocorrectionType:(UITextAutocorrectionType)type
+{
+  _textField.autocorrectionType = type;
+}
+
 - (void) setSelected:(BOOL) selected animated:(BOOL) animated {
 	[super setSelected:selected animated:animated];
   
@@ -103,7 +123,7 @@
   
 	contentRect = self.contentView.bounds;
 	contentRect.origin.x = 120.;
-	contentRect.size.width -= 190.;
+	contentRect.size.width -= 130.;
   
 	_textField.frame = contentRect;
 }

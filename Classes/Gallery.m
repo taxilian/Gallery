@@ -24,6 +24,8 @@
 
 - (id)sendSynchronousCommand:(NSDictionary*)formData
 {
+  [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+  
   NSMutableDictionary *mutableFormData = [NSMutableDictionary dictionaryWithDictionary:formData];
   NSString *mimeBoundary = @"-----iGalleryMIMEBoundary123412341234121";
   
@@ -79,7 +81,6 @@
   
   NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:self.galleryURL]];
   
-  NSLog(@"%d", [cmdTokenData length]);
   [request setValue:[NSString stringWithFormat:@"%d", [cmdTokenData length]] forHTTPHeaderField:@"Content-Length"];
   [request setValue:[NSString stringWithFormat:@"multipart/form-data; boundary=%@", mimeBoundary] forHTTPHeaderField:@"Content-Type"];
   [request setHTTPMethod:@"POST"];
@@ -87,9 +88,7 @@
   
   NSData *connectionData = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
   NSString *connectionReturnString = [[[NSString alloc] initWithData:connectionData encoding:NSASCIIStringEncoding] autorelease];
-  
-  NSLog(connectionReturnString);
-  
+    
   NSArray *cmdTokenArray = [connectionReturnString componentsSeparatedByString:@"\n"];
   [mutableFormData removeAllObjects];
   
@@ -107,6 +106,8 @@
     [authToken release];
     authToken = [[mutableFormData objectForKey:@"auth_token"] retain];
   }
+  
+  [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
   
   return mutableFormData;
 }
