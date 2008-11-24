@@ -6,12 +6,12 @@
 //  Copyright Matt Wright Consulting 2008. All rights reserved.
 //
 
-#import "iGalleryAppDelegate.h"
+#import "GalleryAppDelegate.h"
 #import "iGalleryPhotoController.h"
 #import "iGallerySettingsController.h"
 #import "iGalleryAlbumController.h"
 
-@implementation iGalleryAppDelegate
+@implementation GalleryAppDelegate
 
 @synthesize window;
 @synthesize imagePickerController;
@@ -67,11 +67,10 @@
     self.rootViewController = viewController;
   }
   
-  navigationController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
-  
   if ([viewController isEqual:self.rootViewController])
   {
-    viewController.title = @"iGallery";
+    viewController.title = @"Gallery";
+    navigationController.navigationBar.barStyle = UIBarStyleBlackOpaque;
     
     // Blank placeholder, gets replaced (yeah, wasteful, whatever), with a camera item if we have a camera available.
     viewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Settings" style:UIBarButtonItemStylePlain target:self action:@selector(settings:)];
@@ -80,10 +79,13 @@
     {
       viewController.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(camera:)];
     }
-
+    
   }
-  else if ([viewController isKindOfClass:[iGalleryPhotoController class]] || 
-           [viewController isKindOfClass:[iGallerySettingsController class]] ||
+  else if ([viewController isKindOfClass:[iGalleryPhotoController class]])
+  {
+    navigationController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
+  }
+  else if ([viewController isKindOfClass:[iGallerySettingsController class]] ||
            [viewController isKindOfClass:[iGalleryAlbumController class]])
   {
     // Do nothing
@@ -127,7 +129,7 @@
   [UIView setAnimationDuration:0.25];
   backgroundImageView.image = image;
   [UIView commitAnimations];
-    
+  
   [imagePickerController pushViewController:photoController animated:YES];
 }
 

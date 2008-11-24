@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "Gallery.h"
 
-@interface iGalleryAppDelegate : NSObject <UIApplicationDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate> {
+@interface GalleryAppDelegate : NSObject <UIApplicationDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate> {
 	IBOutlet UIWindow *window;
   
   UIImageView *backgroundImageView;

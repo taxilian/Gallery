@@ -90,6 +90,15 @@
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Credentials Error" message:@"You have not setup your gallery details." delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:@"Settings", nil] autorelease];
     [alert show];
     [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
+    
+    // Get rid of our toolbar now
+    [UIView beginAnimations:@"ToolbarHide" context:(void*)uploadStatusToolbar];
+    [UIView setAnimationDuration:0.25];
+    [UIView setAnimationDelegate:self];
+    [UIView setAnimationDidStopSelector:@selector(animationDidStop:context:)];
+    uploadStatusToolbar.alpha = 0.0;
+    [UIView commitAnimations];
+    
     return;
   }
   
