@@ -11,7 +11,7 @@
 	_textField = [[UITextField alloc] initWithFrame:CGRectZero];
 	_label = [[UILabel alloc] initWithFrame:CGRectZero];
   
-	_label.font = [UIFont boldSystemFontOfSize:18.];
+	_label.font = [UIFont boldSystemFontOfSize:17.];
 	_label.textColor = self.textColor;
 	_label.highlightedTextColor = self.selectedTextColor;
 	_label.backgroundColor = [UIColor clearColor];
@@ -19,7 +19,7 @@
   
 	_textField.textAlignment = UITextAlignmentLeft;
 	_textField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-	_textField.font = [UIFont systemFontOfSize:14.];
+	_textField.font = [UIFont systemFontOfSize:17.];
 	_textField.textColor = [UIColor colorWithRed:0.235294117647059 green:0.341176470588235 blue:0.545098039215686 alpha:1.];
 	_textField.backgroundColor = [UIColor clearColor];
 	_textField.opaque = NO;
