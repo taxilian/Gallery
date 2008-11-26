@@ -13,11 +13,18 @@
   UITableView *tableView;
   UIScrollView *scrollView;
   
+  UIView *activeView;
+  
   NSArray *albumArray;
+  
+  bool isReloading;
+  bool keyboardShown;
 }
 
 @property (nonatomic, retain) UITableView *tableView;
 @property (nonatomic, retain) NSArray *albumArray;
+
+- (BOOL)attemptGalleryUpdate;
 
 - (IBAction)connect:(id)sender;
 - (IBAction)albumView:(id)sender;

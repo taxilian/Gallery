@@ -50,23 +50,29 @@
   scrollView.contentSize = self.tableView.bounds.size;
   scrollView.showsVerticalScrollIndicator = YES;
   
+  isReloading = NO;
+  
   [scrollView addSubview:self.tableView];
   
   [self.view addSubview:scrollView];
 }
 
-- (IBAction)connect:(id)sender
+- (BOOL)attemptGalleryUpdate
 {
   NSError *error;
-  UIActivityIndicatorView *loadingIndicator = [[[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 25, 25)] autorelease];
-  [loadingIndicator startAnimating];
-  [loadingIndicator sizeToFit];
-  loadingIndicator.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin |
-                                       UIViewAutoresizingFlexibleRightMargin |
-                                       UIViewAutoresizingFlexibleTopMargin |
-                                       UIViewAutoresizingFlexibleBottomMargin);
   
-  UIBarButtonItem *loadingBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:loadingIndicator];
+  UIActivityIndicatorView *toolbarLoadingIndicator = [[[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 25, 25)] autorelease];
+  isReloading = YES;
+  
+  [toolbarLoadingIndicator startAnimating];
+  [toolbarLoadingIndicator sizeToFit];
+  
+  toolbarLoadingIndicator.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin |
+                                              UIViewAutoresizingFlexibleRightMargin |
+                                              UIViewAutoresizingFlexibleTopMargin |
+                                              UIViewAutoresizingFlexibleBottomMargin);
+  
+  UIBarButtonItem *loadingBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:toolbarLoadingIndicator];
   loadingBarButtonItem.style = UIBarButtonItemStyleBordered;
   
   [self.navigationItem setRightBarButtonItem:loadingBarButtonItem animated:YES];
@@ -74,6 +80,7 @@
   // Blegh, we haven't got a -display on iPhone. So set needs display and let the runloop run while we do it.
   // If it turns out to be shit, we might have to make it a thread.
   [self.navigationController.navigationBar setNeedsDisplay];
+  [tableView reloadData];
   [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
   
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -87,8 +94,11 @@
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Unable to login" message:@"You must supply credentials before attempting to load Gallery data." delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
     [alert show];
     
+    isReloading = NO;
     [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];
-    return;
+    [tableView reloadData];
+
+    return NO;
   }
   
   Gallery *gallery = [[Gallery alloc] initWithGalleryURL:url];
@@ -99,8 +109,11 @@
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Connection Error" message:[[error localizedDescription] capitalizedString] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
     [alert show];
     
-    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];      
-    return;
+    isReloading = NO;
+    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];
+    [tableView reloadData];
+
+    return NO;
   }
   
   if ([[returnData valueForKey:@"status"] intValue] != 0)
@@ -108,18 +121,24 @@
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Unable to login" message:[returnData valueForKey:@"status_text"] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
     [alert show];
     
+    isReloading = NO;
     [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];
-    return;
-  }
+    [tableView reloadData];
 
+    return NO;
+  }
+  
   returnData = [gallery sendSynchronousCommand:[NSDictionary dictionaryWithObjectsAndKeys:@"yes", @"no_perms", @"fetch-albums-prune", @"cmd", nil] error:&error];
   if (error)
   {
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Connection Error" message:[[error localizedDescription] capitalizedString] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
     [alert show];
     
-    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];      
-    return;
+    isReloading = NO;
+    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];
+    [tableView reloadData];
+
+    return NO;
   }
   
   if ([[returnData valueForKey:@"status"] intValue] != 0)
@@ -127,8 +146,11 @@
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Unable to login" message:[returnData valueForKey:@"status_text"] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
     [alert show];
     
+    isReloading = NO;
     [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];
-    return;
+    [tableView reloadData];
+
+    return NO;
   }
   
   int albumCount = [[returnData valueForKey:@"album_count"] intValue];
@@ -143,11 +165,20 @@
     [albumData setValue:[returnData valueForKey:[NSString stringWithFormat:@"album.parent.%d", currentAlbum]] forKey:@"parent"];
     albums = [albums arrayByAddingObject:albumData];
   }
-    
+  
   self.albumArray = albums;
-  [tableView reloadData];
+  
+  isReloading = NO;
   
   [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];
+  [tableView reloadData];
+  
+  return YES;
+}
+
+- (IBAction)connect:(id)sender
+{
+  [self attemptGalleryUpdate];
 }
 
 - (IBAction)albumView:(id)sender
@@ -157,30 +188,36 @@
 
 #pragma mark Keyboard Notifications
 
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField
+{
+  // All the textfields we've got are inside a doodah inside a cell. The cell is really what we want to centre around.
+  activeView = [[textField superview] superview];
+  return YES;
+}
+
 - (void)willShowKeyboard:(NSNotification*)notification
 {
-  NSLog(@"Show");
-  CGRect keyboardBounds;
-  CGRect scrollViewBounds = [scrollView bounds];
+  if (keyboardShown)
+  {
+    return;
+  }
   
   NSValue *boundsValue = [[notification userInfo] objectForKey:UIKeyboardBoundsUserInfoKey];
-  [boundsValue getValue:&keyboardBounds];
+  CGRect keyboardBounds = [boundsValue CGRectValue];
+   
+  CGRect scrollViewFrame = [scrollView frame];
+  scrollViewFrame.size.height -= keyboardBounds.size.height;
+  scrollView.frame = scrollViewFrame;
   
-  scrollViewBounds.size.height -= keyboardBounds.size.height;
-  
-  [UIView beginAnimations:nil context:nil];
-  [UIView setAnimationDuration:0.25];
-  tableView.frame = scrollViewBounds;
-  [UIView commitAnimations];
+  [scrollView scrollRectToVisible:[activeView convertRect:activeView.frame toView:scrollView] animated:YES];
+  keyboardShown = YES;
 }
 
 - (void)willHideKeyboard:(NSNotification*)notification
 {
-  NSLog(@"Hide");
-  [UIView beginAnimations:nil context:nil];
-  [UIView setAnimationDuration:0.25];
-  tableView.frame = self.view.bounds;
-  [UIView commitAnimations];  
+  scrollView.frame = self.view.bounds;
+  [scrollView setContentOffset:CGPointMake(0.0, 0.0) animated:YES];
+  keyboardShown = NO;
 }
 
 #pragma mark Tableview Datasource
@@ -256,18 +293,25 @@
         cell = [[UITableViewCell alloc] initWithFrame:CGRectZero reuseIdentifier:@"UITableViewCell"];
       }
       
-      cell.textAlignment = UITextAlignmentRight;
-      cell.font = [UIFont systemFontOfSize:[UIFont systemFontSize]];
+      //cell.textAlignment = UITextAlignmentRight;
+      cell.font = [UIFont systemFontOfSize:17.];
       cell.textColor = [UIColor colorWithRed:0.235294117647059 green:0.341176470588235 blue:0.545098039215686 alpha:1.];
       cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
       
-      if ([[NSUserDefaults standardUserDefaults] valueForKey:@"albumTitle"])
+      cell.text = ([[NSUserDefaults standardUserDefaults] valueForKey:@"albumTitle"]) ? [[NSUserDefaults standardUserDefaults] valueForKey:@"albumTitle"] : @"None";
+      
+      if (isReloading)
       {
-        cell.text = [[NSUserDefaults standardUserDefaults] valueForKey:@"albumTitle"];
+        UIActivityIndicatorView *loadingIndicator = [[[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 20.0, 20.0)] autorelease];
+        [loadingIndicator startAnimating];
+        loadingIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
+        [loadingIndicator sizeToFit];
+        loadingIndicator.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin);
+        cell.accessoryView = loadingIndicator;
       }
       else
       {
-        cell.text = @"None";
+        cell.accessoryView = nil;
       }
             
       return cell;
@@ -286,19 +330,39 @@
 }
 
 - (void)tableView:(UITableView *)aTableView didSelectRowAtIndexPath:(NSIndexPath *)newIndexPath
-{
-  [tableView deselectRowAtIndexPath:[aTableView indexPathForSelectedRow] animated:YES];
-  
-  if (albumArray)
+{ 
+  if ([newIndexPath indexAtPosition:0] == 2)
   {
+    if (albumArray)
+    {
+      [tableView deselectRowAtIndexPath:[aTableView indexPathForSelectedRow] animated:YES];
+    }
+    else
+    {
+      [tableView deselectRowAtIndexPath:[aTableView indexPathForSelectedRow] animated:NO];
+      if ([self attemptGalleryUpdate])
+      {
+        if (!albumArray)
+        {
+          UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"No album list loaded from Gallery" message:@"Please press refresh before attempting to choose a new album." delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
+          [alert show];
+          return;
+        }
+      }
+      else
+      {
+        // Couldn't update, however the update presented an error dialog. So just return.
+        return;
+      }
+       
+    }
     iGalleryAlbumController *albumController = [[iGalleryAlbumController alloc] init];
     albumController.tableItems = albumArray;
-    [self.navigationController pushViewController:albumController animated:YES];
+    [self.navigationController pushViewController:albumController animated:YES];  
   }
   else
   {
-    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"No album list loaded from Gallery" message:@"Please press refresh before attempting to choose a new album." delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
-    [alert show];
+    [tableView deselectRowAtIndexPath:[aTableView indexPathForSelectedRow] animated:NO];
   }
 }
 
