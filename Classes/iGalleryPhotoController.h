@@ -11,8 +11,10 @@
 
 @interface iGalleryPhotoController : UIViewController {
   UIImage *image;
+  UIToolbar *toolbar;
 }
 
 @property (nonatomic, retain) UIImage *image;
+@property (nonatomic, retain) UIToolbar *toolbar;
 
 @end

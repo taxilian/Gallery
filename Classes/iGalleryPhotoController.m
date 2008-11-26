@@ -14,6 +14,7 @@
 @implementation iGalleryPhotoController
 
 @synthesize image;
+@synthesize toolbar;
 
 /*
 // Override initWithNibName:bundle: to load the view using a nib file then perform additional customization that is not appropriate for viewDidLoad.
@@ -32,34 +33,56 @@
   self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)];
 }
 
+- (void)showToolbar
+{
+  toolbar = [[UIToolbar alloc] init];
+  
+  // Lets get the size of the toolbar as default.
+  [toolbar sizeToFit];
+  CGFloat toolbarHeight = toolbar.frame.size.height;
+  CGRect viewBounds = self.view.bounds;
+  
+  toolbar.barStyle = UIBarStyleBlackTranslucent;
+  [toolbar setFrame:CGRectMake(CGRectGetMinX(viewBounds), CGRectGetMinY(viewBounds) + CGRectGetHeight(viewBounds) - toolbarHeight, CGRectGetWidth(viewBounds), toolbarHeight)];  
+  [self.view addSubview:toolbar];
+}
+
+- (void)updateToolbar
+{
+  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+}
+
+- (void)hideToolbar
+{
+  // Get rid of our toolbar now
+  [UIView beginAnimations:@"ToolbarHide" context:(void*)toolbar];
+  [UIView setAnimationDuration:0.25];
+  [UIView setAnimationDelegate:self];
+  [UIView setAnimationDidStopSelector:@selector(animationDidStop:context:)];
+  toolbar.alpha = 0.0;
+  [UIView commitAnimations];  
+}
+
 - (IBAction)upload:(id)sender
 {
   NSError *error;
-  UIToolbar *uploadStatusToolbar = [[UIToolbar alloc] init];
-  float progressIncrements = 1.0 / 5.0;
-
-  // Lets get the size of the toolbar as default.
-  [uploadStatusToolbar sizeToFit];
-  CGFloat toolbarHeight = uploadStatusToolbar.frame.size.height;
-  CGRect viewBounds = self.view.bounds;
+  float progressIncrements = 1.0 / 4.0;
   
-  uploadStatusToolbar.barStyle = UIBarStyleBlackTranslucent;
-  [uploadStatusToolbar setFrame:CGRectMake(CGRectGetMinX(viewBounds), CGRectGetMinY(viewBounds) + CGRectGetHeight(viewBounds) - toolbarHeight, CGRectGetWidth(viewBounds), toolbarHeight)];
+  [self showToolbar];
   
   // Make a toolbar progress view thingy
-  CGRect toolbarBounds = uploadStatusToolbar.bounds;
+  CGRect toolbarBounds = toolbar.bounds;
   ProgressTextBarView *progressTextView = [[ProgressTextBarView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(toolbarBounds) * 0.6, CGRectGetHeight(toolbarBounds) * 0.8)];
   progressTextView.textField.text = @"Initialising...";
-  progressTextView.progressView.progress = progressIncrements;
+  progressTextView.progressView.progress = 0.0;
   
   // Set the toolbar up, <- variable space -> <- progress -> <- variable space ->
   // Makes sure it is centered nicely
-  [uploadStatusToolbar setItems:[NSArray arrayWithObjects:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
-                                 [[UIBarButtonItem alloc] initWithCustomView:progressTextView],
-                                 [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil], nil]];
+  [toolbar setItems:[NSArray arrayWithObjects:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
+                     [[UIBarButtonItem alloc] initWithCustomView:progressTextView],
+                     [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil], nil]];
   
-  [self.view addSubview:uploadStatusToolbar];
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+  [self updateToolbar];
   
   // Replace the "upload" button with a spinning indicator
   UIActivityIndicatorView *loadingIndicator = [[[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 25, 25)] autorelease];
@@ -75,8 +98,7 @@
   
   // Lots of stuff probably needs a display by now anyway.
   [self.navigationItem setRightBarButtonItem:loadingBarButtonItem animated:YES];
-  [self.navigationController.navigationBar setNeedsDisplay];
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+  [self.navigationController.navigationBar drawRect:self.navigationController.navigationBar.frame];
   
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   NSString *galleryURL = [defaults valueForKey:@"gallery_url"];
@@ -90,21 +112,14 @@
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Credentials Error" message:@"You have not setup your gallery details." delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:@"Settings", nil] autorelease];
     [alert show];
     [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
-    
-    // Get rid of our toolbar now
-    [UIView beginAnimations:@"ToolbarHide" context:(void*)uploadStatusToolbar];
-    [UIView setAnimationDuration:0.25];
-    [UIView setAnimationDelegate:self];
-    [UIView setAnimationDidStopSelector:@selector(animationDidStop:context:)];
-    uploadStatusToolbar.alpha = 0.0;
-    [UIView commitAnimations];
+    [self hideToolbar];
     
     return;
   }
   
   progressTextView.textField.text = @"Logging in...";
   progressTextView.progressView.progress += progressIncrements;
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+  [self updateToolbar];
   
   Gallery *gallery = [[Gallery alloc] initWithGalleryURL:galleryURL];
   NSDictionary *resultDictionary = [gallery sendSynchronousCommand:[NSDictionary dictionaryWithObjectsAndKeys:galleryPassword, @"password", galleryUsername, @"uname", @"login", @"cmd", nil] error:&error];
@@ -116,15 +131,7 @@
     [alert show];
     
     [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
-    
-    // Get rid of our toolbar now
-    [UIView beginAnimations:@"ToolbarHide" context:(void*)uploadStatusToolbar];
-    [UIView setAnimationDuration:0.25];
-    [UIView setAnimationDelegate:self];
-    [UIView setAnimationDidStopSelector:@selector(animationDidStop:context:)];
-    uploadStatusToolbar.alpha = 0.0;
-    [UIView commitAnimations];
-    
+    [self hideToolbar];
     return;
   }
   
@@ -134,27 +141,19 @@
     [alert show];
 
     [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
-    
-    // Get rid of our toolbar now
-    [UIView beginAnimations:@"ToolbarHide" context:(void*)uploadStatusToolbar];
-    [UIView setAnimationDuration:0.25];
-    [UIView setAnimationDelegate:self];
-    [UIView setAnimationDidStopSelector:@selector(animationDidStop:context:)];
-    uploadStatusToolbar.alpha = 0.0;
-    [UIView commitAnimations];
-    
+    [self hideToolbar];
     return;
   }
   
   progressTextView.textField.text = @"Rotating...";
   progressTextView.progressView.progress += progressIncrements;
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+  [self updateToolbar];
   
   UIImage *rotatedImage = [image rotateImage];
   
   progressTextView.textField.text = @"Uploading...";
   progressTextView.progressView.progress += progressIncrements;
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+  [self updateToolbar];
   
   resultDictionary = [gallery sendSynchronousCommand:[NSDictionary dictionaryWithObjectsAndKeys:rotatedImage, @"g2_userfile", galleryID, @"set_albumName", @"add-item", @"cmd", nil] error:&error];
   
@@ -164,15 +163,7 @@
     [alert show];
     
     [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
-    
-    // Get rid of our toolbar now
-    [UIView beginAnimations:@"ToolbarHide" context:(void*)uploadStatusToolbar];
-    [UIView setAnimationDuration:0.25];
-    [UIView setAnimationDelegate:self];
-    [UIView setAnimationDidStopSelector:@selector(animationDidStop:context:)];
-    uploadStatusToolbar.alpha = 0.0;
-    [UIView commitAnimations];
-    
+    [self hideToolbar];
     return;
   }
   
@@ -181,18 +172,12 @@
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Gallery Error" message:[resultDictionary valueForKey:@"status_text"] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
     [alert show];
     [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
+    [self hideToolbar];
     return;
   }
   
   [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
-
-  // Get rid of our toolbar now
-  [UIView beginAnimations:@"ToolbarHide" context:(void*)uploadStatusToolbar];
-  [UIView setAnimationDuration:0.25];
-  [UIView setAnimationDelegate:self];
-  [UIView setAnimationDidStopSelector:@selector(animationDidStop:context:)];
-  uploadStatusToolbar.alpha = 0.0;
-  [UIView commitAnimations];
+  [self hideToolbar];
 }
   
 - (void)animationDidStop:(NSString *)animationID finished:(BOOL)flag context:(void *)context
@@ -200,8 +185,8 @@
   if ([animationID isEqual:@"ToolbarHide"])
   {
     NSLog(@"%@, %@", animationID, context);
-    UIToolbar *toolbar = (UIToolbar*)context;
-    [toolbar removeFromSuperview];
+    UIToolbar *contextToolbar = (UIToolbar*)context;
+    [contextToolbar removeFromSuperview];
   }
 }
 
