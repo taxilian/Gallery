@@ -88,10 +88,11 @@
   else if ([viewController isKindOfClass:[iGallerySettingsController class]] ||
            [viewController isKindOfClass:[iGalleryAlbumController class]])
   {
-    // Do nothing
+    navigationController.navigationBar.barStyle = UIBarStyleBlackOpaque;
   }
   else
   {
+    navigationController.navigationBar.barStyle = UIBarStyleBlackOpaque;
     [UIView beginAnimations:nil context:nil];
     [UIView setAnimationDuration:0.25];
     backgroundImageView.image = nil;
@@ -120,6 +121,9 @@
   {
     picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     self.rootViewController = nil;
+    
+    // Save the image out to the device
+    UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
   }
   
   iGalleryPhotoController *photoController = [[iGalleryPhotoController alloc] init];
@@ -135,7 +139,11 @@
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
 {
-  // I removed the cancel button, muwhahaha!
+  if (picker.sourceType == UIImagePickerControllerSourceTypeCamera)
+  {
+    picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    self.rootViewController = nil;
+  }
 }
 
 @end
