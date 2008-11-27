@@ -31,7 +31,7 @@
 
 - (void)update;
 
-- (void)willShowKeyboard:(NSNotification*)notification;
-- (void)willHideKeyboard:(NSNotification*)notification;
+- (void)didShowKeyboard:(NSNotification*)notification;
+- (void)didHideKeyboard:(NSNotification*)notification;
 
 @end

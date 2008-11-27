@@ -35,8 +35,8 @@
 - (void)loadView {
   [super loadView];
   
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willShowKeyboard:) name:@"UIKeyboardWillShowNotification" object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willHideKeyboard:) name:@"UIKeyboardWillHideNotification" object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didShowKeyboard:) name:@"UIKeyboardDidShowNotification" object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didHideKeyboard:) name:@"UIKeyboardDidHideNotification" object:nil];
   
   self.title = @"Settings";
   self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)];
@@ -46,15 +46,7 @@
   self.tableView.dataSource = self;
   self.tableView.delegate = self;
   
-  scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
-  scrollView.contentSize = self.tableView.bounds.size;
-  scrollView.showsVerticalScrollIndicator = YES;
-  
-  isReloading = NO;
-  
-  [scrollView addSubview:self.tableView];
-  
-  [self.view addSubview:scrollView];
+  [self.view addSubview:tableView];
 }
 
 - (BOOL)attemptGalleryUpdate
@@ -191,32 +183,44 @@
 - (BOOL)textFieldShouldBeginEditing:(UITextField *)textField
 {
   // All the textfields we've got are inside a doodah inside a cell. The cell is really what we want to centre around.
-  activeView = [[textField superview] superview];
+  activeView = textField;
   return YES;
 }
 
-- (void)willShowKeyboard:(NSNotification*)notification
+- (void)didShowKeyboard:(NSNotification*)notification
 {
   if (keyboardShown)
   {
     return;
   }
   
+  NSArray *indexPathArray = [tableView indexPathsForRowsInRect:[tableView convertRect:activeView.frame fromView:activeView]];
   NSValue *boundsValue = [[notification userInfo] objectForKey:UIKeyboardBoundsUserInfoKey];
   CGRect keyboardBounds = [boundsValue CGRectValue];
    
-  CGRect scrollViewFrame = [scrollView frame];
-  scrollViewFrame.size.height -= keyboardBounds.size.height;
-  scrollView.frame = scrollViewFrame;
+  CGRect tableViewFrame = [tableView frame];
+  tableViewFrame.size.height -= keyboardBounds.size.height;
+  tableView.frame = tableViewFrame;
   
-  [scrollView scrollRectToVisible:[activeView convertRect:activeView.frame toView:scrollView] animated:YES];
+  if ([indexPathArray count] > 0)
+  {
+    [tableView scrollToRowAtIndexPath:[indexPathArray objectAtIndex:0] atScrollPosition:UITableViewScrollPositionTop animated:YES];
+  }
   keyboardShown = YES;
 }
 
-- (void)willHideKeyboard:(NSNotification*)notification
+- (void)didHideKeyboard:(NSNotification*)notification
 {
-  scrollView.frame = self.view.bounds;
-  [scrollView setContentOffset:CGPointMake(0.0, 0.0) animated:YES];
+  NSValue *boundsValue = [[notification userInfo] objectForKey:UIKeyboardBoundsUserInfoKey];
+  CGRect keyboardBounds = [boundsValue CGRectValue];
+  
+  CGRect tableViewFrame = [tableView frame];
+  tableViewFrame.size.height += keyboardBounds.size.height;
+  
+  [UIView beginAnimations:@"tableView" context:nil];
+  tableView.frame = tableViewFrame;
+  [UIView commitAnimations];
+  
   keyboardShown = NO;
 }
 
@@ -397,6 +401,19 @@
       return @"Authentication";
     case 2:
       return @"Upload Album";
+    default:
+      return nil;
+  }
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
+{
+  switch (section)
+  {
+    case 0:
+      return @"You should include the /main.php at the\nend of the address.";
+    case 1:
+    case 2:
     default:
       return nil;
   }
