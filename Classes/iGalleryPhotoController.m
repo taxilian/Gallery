@@ -187,6 +187,7 @@
     NSLog(@"%@, %@", animationID, context);
     UIToolbar *contextToolbar = (UIToolbar*)context;
     [contextToolbar removeFromSuperview];
+    [contextToolbar release];
   }
 }
 
@@ -209,7 +210,8 @@
 
 
 - (void)dealloc {
-    [super dealloc];
+  [image release];
+  [super dealloc];
 }
 
 

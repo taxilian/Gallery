@@ -126,7 +126,7 @@
     UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
   }
   
-  iGalleryPhotoController *photoController = [[iGalleryPhotoController alloc] init];
+  iGalleryPhotoController *photoController = [[[iGalleryPhotoController alloc] init] autorelease];
   photoController.image = image;
   
   [UIView beginAnimations:nil context:nil];
