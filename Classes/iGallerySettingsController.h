@@ -7,9 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
-
+#import "Gallery.h"
 
 @interface iGallerySettingsController : UIViewController <UITableViewDataSource, UITextFieldDelegate, UITableViewDelegate> {
+  Gallery *gallery;
+  
   UITableView *tableView;
   UIScrollView *scrollView;
   
@@ -17,17 +19,18 @@
   
   NSArray *albumArray;
   
-  bool isReloading;
+  bool updateWantedAlbumList;
+  bool showLoadingIndicator;
   bool keyboardShown;
 }
 
 @property (nonatomic, retain) UITableView *tableView;
 @property (nonatomic, retain) NSArray *albumArray;
+@property (nonatomic, retain) Gallery *gallery;
 
 - (BOOL)attemptGalleryUpdate;
 
 - (IBAction)connect:(id)sender;
-- (IBAction)albumView:(id)sender;
 
 - (void)update;
 

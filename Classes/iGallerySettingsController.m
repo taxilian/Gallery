@@ -10,16 +10,30 @@
 
 #import "iGalleryAlbumController.h"
 #import "CQPreferencesTextCell.h"
-#import "Gallery.h"
 
 #define urlTAG 1
 #define usernameTAG 2
 #define passwordTAG 3
 
+enum 
+{
+  GalleryProgressLogin,
+  GalleryProgressFetch
+};
+
+@interface iGallerySettingsController (Private)
+
+- (void)displayErrorFromDictionary:(NSDictionary*)dictionary;
+- (void)displayAlbumList;
+
+@end
+
+
 @implementation iGallerySettingsController
 
 @synthesize tableView;
 @synthesize albumArray;
+@synthesize gallery;
 
 /*
 // Override initWithNibName:bundle: to load the view using a nib file then perform additional customization that is not appropriate for viewDidLoad.
@@ -46,15 +60,17 @@
   self.tableView.dataSource = self;
   self.tableView.delegate = self;
   
+  self.gallery = [[Gallery alloc] initWithGalleryURL:nil delegate:self];
+  
+  showLoadingIndicator = NO;
+  updateWantedAlbumList = NO;
+  
   [self.view addSubview:tableView];
 }
 
-- (BOOL)attemptGalleryUpdate
+- (void)showLoadingIndicators
 {
-  NSError *error;
-  
   UIActivityIndicatorView *toolbarLoadingIndicator = [[[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 25, 25)] autorelease];
-  isReloading = YES;
   
   [toolbarLoadingIndicator startAnimating];
   [toolbarLoadingIndicator sizeToFit];
@@ -69,11 +85,25 @@
   
   [self.navigationItem setRightBarButtonItem:loadingBarButtonItem animated:YES];
   
-  // Blegh, we haven't got a -display on iPhone. So set needs display and let the runloop run while we do it.
-  // If it turns out to be shit, we might have to make it a thread.
-  [self.navigationController.navigationBar setNeedsDisplay];
+  // We can't directly access the indicator in the tableView because of cell re-use. So set a flag and reload (force cell refresh)
+  // the tableview.
+  showLoadingIndicator = YES;
   [tableView reloadData];
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+}
+
+- (void)hideLoadingIndicators
+{
+  [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];
+  
+  showLoadingIndicator = NO;
+  [tableView reloadData];
+}
+
+- (BOOL)attemptGalleryUpdate
+{
+  //isReloading = YES;
+  //[tableView reloadData];
+  [self showLoadingIndicators];
   
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   NSString *url = [defaults valueForKey:@"gallery_url"];
@@ -86,96 +116,94 @@
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Unable to login" message:@"You must supply credentials before attempting to load Gallery data." delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
     [alert show];
     
-    isReloading = NO;
-    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];
-    [tableView reloadData];
-
     return NO;
   }
+  self.gallery.galleryURL = url;
   
-  Gallery *gallery = [[Gallery alloc] initWithGalleryURL:url];
-  NSDictionary *returnData = [gallery sendSynchronousCommand:[NSDictionary dictionaryWithObjectsAndKeys:password, @"password", username, @"uname", @"login", @"cmd", nil] error:&error];
-  
-  if (error)
+  NSURLRequest *request = [gallery requestForCommandDictionary:[NSDictionary dictionaryWithObjectsAndKeys:password, @"password", username, @"uname", @"login", @"cmd", nil]];
+  if (![gallery beginAsyncRequest:request withTag:GalleryProgressLogin])
   {
-    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Connection Error" message:[[error localizedDescription] capitalizedString] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
-    [alert show];
     
-    isReloading = NO;
-    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];
-    [tableView reloadData];
-
-    return NO;
   }
-  
-  if ([[returnData valueForKey:@"status"] intValue] != 0)
-  {
-    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Unable to login" message:[returnData valueForKey:@"status_text"] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
-    [alert show];
-    
-    isReloading = NO;
-    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];
-    [tableView reloadData];
-
-    return NO;
-  }
-  
-  returnData = [gallery sendSynchronousCommand:[NSDictionary dictionaryWithObjectsAndKeys:@"yes", @"no_perms", @"fetch-albums-prune", @"cmd", nil] error:&error];
-  if (error)
-  {
-    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Connection Error" message:[[error localizedDescription] capitalizedString] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
-    [alert show];
-    
-    isReloading = NO;
-    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];
-    [tableView reloadData];
-
-    return NO;
-  }
-  
-  if ([[returnData valueForKey:@"status"] intValue] != 0)
-  {
-    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Unable to login" message:[returnData valueForKey:@"status_text"] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
-    [alert show];
-    
-    isReloading = NO;
-    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];
-    [tableView reloadData];
-
-    return NO;
-  }
-  
-  int albumCount = [[returnData valueForKey:@"album_count"] intValue];
-  int currentAlbum;
-  
-  NSArray *albums = [NSArray array];
-  for (currentAlbum = 1; currentAlbum < (albumCount + 1); currentAlbum++)
-  {
-    NSMutableDictionary *albumData = [NSMutableDictionary dictionary];
-    [albumData setValue:[returnData valueForKey:[NSString stringWithFormat:@"album.name.%d", currentAlbum]] forKey:@"name"];
-    [albumData setValue:[returnData valueForKey:[NSString stringWithFormat:@"album.title.%d", currentAlbum]] forKey:@"title"];
-    [albumData setValue:[returnData valueForKey:[NSString stringWithFormat:@"album.parent.%d", currentAlbum]] forKey:@"parent"];
-    albums = [albums arrayByAddingObject:albumData];
-  }
-  
-  self.albumArray = albums;
-  
-  isReloading = NO;
-  
-  [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease] animated:YES];
-  [tableView reloadData];
-  
   return YES;
+}
+
+- (void)didRecieveCommandDictionary:(NSDictionary*)dictionary withTag:(long)tag
+{
+  if ([[dictionary valueForKey:@"status"] intValue] != 0)
+  {
+    updateWantedAlbumList = NO;
+    [self displayErrorFromDictionary:dictionary];
+    [self hideLoadingIndicators];
+    return;
+  }
+  
+  switch (tag)
+  {
+    case GalleryProgressLogin:
+    {
+      NSURLRequest *request = [gallery requestForCommandDictionary:[NSDictionary dictionaryWithObjectsAndKeys:@"yes", @"no_perms", @"fetch-albums-prune", @"cmd", nil]];
+      [gallery beginAsyncRequest:request withTag:GalleryProgressFetch];
+      break;
+    }
+    case GalleryProgressFetch:
+    {
+      int currentAlbum, albumCount = [[dictionary valueForKey:@"album_count"] intValue];
+      NSArray *albums = [NSArray array];
+      
+      for (currentAlbum = 1; currentAlbum < (albumCount + 1); currentAlbum++)
+      {
+        NSMutableDictionary *itemData = [NSMutableDictionary dictionary];
+        [itemData setValue:[dictionary valueForKey:[NSString stringWithFormat:@"album.name.%d", currentAlbum]] forKey:@"name"];
+        [itemData setValue:[dictionary valueForKey:[NSString stringWithFormat:@"album.title.%d", currentAlbum]] forKey:@"title"];
+        [itemData setValue:[dictionary valueForKey:[NSString stringWithFormat:@"album.parent.%d", currentAlbum]] forKey:@"parent"];
+        albums = [albums arrayByAddingObject:itemData];
+      }
+      self.albumArray = albums;
+      [tableView reloadData];
+      
+      // We're done here, hide the spinningness
+      [self hideLoadingIndicators];
+      
+      if (updateWantedAlbumList)
+      {
+        // Bit of a hack, we actually had clicked the album list before starting all this
+        // so we need to simulate that now.
+        
+        updateWantedAlbumList = NO;
+        [self displayAlbumList];
+      }
+      
+      break;
+    }
+    default:
+      // Foo
+      break;
+  }
+}
+
+- (void)displayErrorFromDictionary:(NSDictionary*)dictionary
+{
+  UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Unable to login" message:[dictionary valueForKey:@"status_text"] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
+  [alert show];
+}
+
+- (void)displayAlbumList
+{  
+  if (!albumArray)
+  {
+    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"No album list loaded from Gallery" message:@"Please press refresh before attempting to choose a new album." delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
+    [alert show];
+    return;
+  }
+  iGalleryAlbumController *albumController = [[iGalleryAlbumController alloc] init];
+  albumController.tableItems = albumArray;
+  [self.navigationController pushViewController:albumController animated:YES];  
 }
 
 - (IBAction)connect:(id)sender
 {
   [self attemptGalleryUpdate];
-}
-
-- (IBAction)albumView:(id)sender
-{
-
 }
 
 #pragma mark Keyboard Notifications
@@ -304,7 +332,7 @@
       
       cell.text = ([[NSUserDefaults standardUserDefaults] valueForKey:@"albumTitle"]) ? [[NSUserDefaults standardUserDefaults] valueForKey:@"albumTitle"] : @"None";
       
-      if (isReloading)
+      if (showLoadingIndicator)
       {
         UIActivityIndicatorView *loadingIndicator = [[[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 20.0, 20.0)] autorelease];
         [loadingIndicator startAnimating];
@@ -340,29 +368,17 @@
     if (albumArray)
     {
       [tableView deselectRowAtIndexPath:[aTableView indexPathForSelectedRow] animated:YES];
+      [self displayAlbumList];
     }
     else
     {
       [tableView deselectRowAtIndexPath:[aTableView indexPathForSelectedRow] animated:NO];
-      if ([self attemptGalleryUpdate])
-      {
-        if (!albumArray)
-        {
-          UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"No album list loaded from Gallery" message:@"Please press refresh before attempting to choose a new album." delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
-          [alert show];
-          return;
-        }
-      }
-      else
-      {
-        // Couldn't update, however the update presented an error dialog. So just return.
-        return;
-      }
-       
+      
+      updateWantedAlbumList = YES;
+      [self attemptGalleryUpdate];
+      return;
     }
-    iGalleryAlbumController *albumController = [[iGalleryAlbumController alloc] init];
-    albumController.tableItems = albumArray;
-    [self.navigationController pushViewController:albumController animated:YES];  
+    // displayAlbumList will be called later by the other end of the async socket work.
   }
   else
   {
