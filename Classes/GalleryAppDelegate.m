@@ -105,9 +105,11 @@
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingImage:(UIImage *)image editingInfo:(NSDictionary *)editingInfo
 {
-  if (!CGSizeEqualToSize(image.size, backgroundImageView.bounds.size))
+  CGRect iPhoneBounds = [[UIApplication sharedApplication] keyWindow].bounds;
+  
+  if (!CGSizeEqualToSize(image.size, iPhoneBounds.size))
   {
-    float heightScale = backgroundImageView.bounds.size.height / image.size.height;
+    float heightScale = (image.size.height < image.size.width) ? (iPhoneBounds.size.width / image.size.width) : (iPhoneBounds.size.height / image.size.height);
     
     CGRect newImageViewBounds;
     newImageViewBounds.origin = CGPointZero;
