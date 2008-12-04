@@ -128,7 +128,7 @@ enum
   return YES;
 }
 
-- (void)didRecieveCommandDictionary:(NSDictionary*)dictionary withTag:(long)tag
+- (void)gallery:(Gallery*)thisGallery didRecieveCommandDictionary:(NSDictionary*)dictionary withTag:(long)tag
 {
   if ([[dictionary valueForKey:@"status"] intValue] != 0)
   {

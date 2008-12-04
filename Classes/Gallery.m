@@ -38,6 +38,11 @@
 
 - (NSURLRequest*)requestForCommandDictionary:(NSDictionary*)dict
 {
+  return [self requestForCommandDictionary:dict imageName:nil];
+}
+
+- (NSURLRequest*)requestForCommandDictionary:(NSDictionary*)dict imageName:(NSString*)name
+{
   NSMutableDictionary *mutableFormData = [NSMutableDictionary dictionaryWithDictionary:dict];
   NSString *mimeBoundary = @"-----iGalleryMIMEBoundary123412341234121";
   NSString *gURL = [NSString stringWithFormat:@"%@?g2_controller=remote:GalleryRemote", galleryURL];
@@ -67,20 +72,24 @@
       NSMutableData *dataFragment = [NSMutableData data];
       NSMutableString *payloadFragment = [NSMutableString stringWithFormat:@"--%@\r\n", mimeBoundary];
       
-      NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
-      [dateFormatter setDateFormat:@"ddmmyy-HHmm"];
-      NSString *fileNameStamp = [NSString stringWithFormat:@"iPhone-%@.jpg", [[dateFormatter stringFromDate:[NSDate date]] stringByReplacingOccurrencesOfString:@" " withString:@""]];
+      NSString *fileName = name;
+      if (!fileName)
+      {
+        NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
+        [dateFormatter setDateFormat:@"ddmmyy-HHmm"];
+        fileName = [NSString stringWithFormat:@"iPhone-%@.jpg", [[dateFormatter stringFromDate:[NSDate date]] stringByReplacingOccurrencesOfString:@" " withString:@""]];
+      }
       
       [payloadFragment appendFormat:@"Content-Disposition: form-data; name=\"g2_form[force_filename]\"\r\n\r\n", key];
-      [payloadFragment appendFormat:@"%@\r\n", fileNameStamp];
+      [payloadFragment appendFormat:@"%@\r\n", fileName];
       
       [payloadFragment appendFormat:@"--%@\r\n", mimeBoundary];
       [payloadFragment appendFormat:@"Content-Disposition: form-data; name=\"g2_form[caption]\"\r\n\r\n", key];
-      [payloadFragment appendFormat:@"%@\r\n", fileNameStamp];
+      [payloadFragment appendFormat:@"%@\r\n", fileName];
       
       [payloadFragment appendFormat:@"--%@\r\n", mimeBoundary];
       [payloadFragment appendFormat:@"Content-Type: image/jpeg\r\n"];
-      [payloadFragment appendFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\n\r\n", key, fileNameStamp];
+      [payloadFragment appendFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\n\r\n", key, fileName];
       [dataFragment appendData:[payloadFragment dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES]];
       
       NSData *imageData = UIImageJPEGRepresentation(payloadContent, 0.6);
@@ -173,7 +182,14 @@
     CFRelease(messageRef);
     messageRef = nil;
     
-    [socket writeData:data withTimeout:-1 tag:tag];
+    uploadChunkSize = [data length] * 0.1;
+    NSData *firstChunk = [data subdataWithRange:NSMakeRange(0, uploadChunkSize)];
+    uploadData = [[data subdataWithRange:NSMakeRange(uploadChunkSize, [data length] - uploadChunkSize)] retain];
+    
+    [socket setUserData:uploadChunkSize];
+    [socket writeData:firstChunk withTimeout:-1 tag:tag];
+    
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     return YES;
   }
   NSLog(@"Failed to connect.");
@@ -196,8 +212,30 @@
 
 - (void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag
 {
-  // We've sent something, probably need to read the response now
-  [sock readDataWithTimeout:-1 tag:tag];
+  // Tell our delegate that we've uploaded some data
+  if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didUploadBytes:withTag:)])
+  {
+    [[self delegate] gallery:self didUploadBytes:[sock userData] withTag:tag];
+  }
+
+  if ([uploadData length] > 0)
+  {
+    // We've not completed the current upload yet, lets carry on
+    int chunkSize = MIN(uploadChunkSize, [uploadData length]);
+    NSData *nextChunk = [uploadData subdataWithRange:NSMakeRange(0, chunkSize)];
+    uploadData = [[[uploadData autorelease] subdataWithRange:NSMakeRange(chunkSize, [uploadData length] - chunkSize)] retain];
+    
+    [sock setUserData:chunkSize];
+    [sock writeData:nextChunk withTimeout:-1 tag:tag];
+  }
+  else
+  {
+    // We've sent something, probably need to read the response now
+    [uploadData release];
+    uploadData = nil;
+    
+    [sock readDataWithTimeout:-1 tag:tag];
+  }
 }
 
 - (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
@@ -235,10 +273,11 @@
         CFRelease(messageRef);
         messageRef = nil;
         
-        if ([self delegate] && [[self delegate] respondsToSelector:@selector(didRecieveCommandDictionary:withTag:)])
+        if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didRecieveCommandDictionary:withTag:)])
         {
-          [[self delegate] didRecieveCommandDictionary:[self commandDictionaryFromData:bodyData] withTag:tag];
+          [[self delegate] gallery:self didRecieveCommandDictionary:[self commandDictionaryFromData:bodyData] withTag:tag];
         }
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
       }
       CFRelease(bodyData);
       CFRelease(headers);

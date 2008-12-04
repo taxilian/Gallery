@@ -7,16 +7,21 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <CFNetwork/CFNetwork.h>
 #import "AsyncSocket.h"
 
 @interface Gallery : NSObject {
   AsyncSocket *socket;
   id delegate;
   
+  NSData *uploadData;
+  
   NSString *galleryURL;
   NSString *authToken;
   
   CFHTTPMessageRef messageRef;
+  
+  int uploadChunkSize;
 }
 
 @property (nonatomic,retain) NSString *galleryURL;
@@ -26,6 +31,7 @@
 - (id)initWithGalleryURL:(NSString*)url delegate:(id)delegate;
 
 - (NSURLRequest*)requestForCommandDictionary:(NSDictionary*)dict;
+- (NSURLRequest*)requestForCommandDictionary:(NSDictionary*)dict imageName:(NSString*)name;
 - (NSDictionary*)commandDictionaryFromData:(NSData*)data;
 
 - (BOOL)beginAsyncRequest:(NSURLRequest*)request;
@@ -37,6 +43,7 @@
 
 @interface NSObject (GalleryDelegates)
 
-- (void)didRecieveCommandDictionary:(NSDictionary*)dictionary withTag:(long)tag;
+- (void)gallery:(Gallery*)gallery didRecieveCommandDictionary:(NSDictionary*)dictionary withTag:(long)tag;
+- (void)gallery:(Gallery*)aGallery didUploadBytes:(long)count withTag:(long)tag;
 
 @end
