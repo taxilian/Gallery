@@ -7,14 +7,39 @@
 //
 
 #import "iGalleryPhotoController.h"
-#import "Gallery.h"
 #import "ProgressTextBarView.h"
 #import "UIImage+Extras.h"
 
+#define PROGRESS_STEPS (1.0 / 4.0)
+
+enum
+{
+  GalleryProgressLogin,
+  GalleryProgressRotate,
+  GalleryProgressStartUpload,
+  GalleryProgressUpload
+};
+
+@interface iGalleryPhotoController (Private)
+
+- (NSArray*)normalToolbarArray;
+- (NSArray*)uploadToolbarArray;
+
+- (void)showUploadButton;
+- (void)showProgressIndicator;
+
+- (void)updateUploadProgress;
+
+- (ProgressTextBarView*)toolbarProgressView;
+
+@end
+
 @implementation iGalleryPhotoController
 
+@synthesize gallery;
 @synthesize image;
 @synthesize toolbar;
+@synthesize imageName;
 
 /*
 // Override initWithNibName:bundle: to load the view using a nib file then perform additional customization that is not appropriate for viewDidLoad.
@@ -29,13 +54,22 @@
 // Implement loadView to create a view hierarchy programmatically.
 - (void)loadView {
   [super loadView];
-  self.title = @"iGallery";
+  
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didShowKeyboard:) name:@"UIKeyboardDidShowNotification" object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didHideKeyboard:) name:@"UIKeyboardDidHideNotification" object:nil];
+  
+  self.title = @"Gallery";
   self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)];
-}
+  
+  // Init the gallery object
+  self.gallery = [[Gallery alloc] initWithGalleryURL:[[NSUserDefaults standardUserDefaults] valueForKey:@"gallery_url"] delegate:self];
 
-- (void)showToolbar
-{
   toolbar = [[UIToolbar alloc] init];
+
+  // Generate an image name based on the current date
+  NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
+  [dateFormatter setDateFormat:@"ddMMyy-HHmm"];
+  self.imageName = [NSString stringWithFormat:@"iPhone-%@.jpg", [[dateFormatter stringFromDate:[NSDate date]] stringByReplacingOccurrencesOfString:@" " withString:@""]];
   
   // Lets get the size of the toolbar as default.
   [toolbar sizeToFit];
@@ -45,45 +79,154 @@
   toolbar.barStyle = UIBarStyleBlackTranslucent;
   [toolbar setFrame:CGRectMake(CGRectGetMinX(viewBounds), CGRectGetMinY(viewBounds) + CGRectGetHeight(viewBounds) - toolbarHeight, CGRectGetWidth(viewBounds), toolbarHeight)];  
   [self.view addSubview:toolbar];
+  
+  [toolbar setItems:[self normalToolbarArray] animated:YES];
 }
 
-- (void)updateToolbar
+- (void)showToolbars
 {
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+  // Get rid of our toolbar now
+  [UIView beginAnimations:@"ToolbarShow" context:(void*)toolbar];
+  [UIView setAnimationDuration:0.25];
+  toolbar.alpha = 1.0;
+  [UIView commitAnimations];
 }
 
-- (void)hideToolbar
+- (void)hideToolbars
 {
   // Get rid of our toolbar now
   [UIView beginAnimations:@"ToolbarHide" context:(void*)toolbar];
   [UIView setAnimationDuration:0.25];
-  [UIView setAnimationDelegate:self];
-  [UIView setAnimationDidStopSelector:@selector(animationDidStop:context:)];
   toolbar.alpha = 0.0;
   [UIView commitAnimations];  
 }
 
-- (IBAction)upload:(id)sender
+- (NSArray*)normalToolbarArray
 {
-  NSError *error;
-  float progressIncrements = 1.0 / 4.0;
+    
+  UILabel *topTextView = [[[UILabel alloc] initWithFrame:CGRectMake(0, 0, 200, 18)] autorelease];
+  topTextView.backgroundColor = [UIColor clearColor];
+  topTextView.text = self.imageName;
+  topTextView.textAlignment = UITextAlignmentCenter;
+  topTextView.font = [UIFont boldSystemFontOfSize:[UIFont smallSystemFontSize]];
+  topTextView.textColor = [UIColor whiteColor];
   
-  [self showToolbar];
+  UILabel *bottomTextView = [[[UILabel alloc] initWithFrame:CGRectMake(0, 18, 200, 18)] autorelease];
+  bottomTextView.backgroundColor = [UIColor clearColor];
+  bottomTextView.text = [NSString stringWithFormat:@"%1.fx%1.f", image.size.width, image.size.height];
+  bottomTextView.textAlignment = UITextAlignmentCenter;
+  bottomTextView.font = [UIFont systemFontOfSize:[UIFont smallSystemFontSize]];
+  bottomTextView.textColor = [UIColor whiteColor];
   
-  // Make a toolbar progress view thingy
-  CGRect toolbarBounds = toolbar.bounds;
-  ProgressTextBarView *progressTextView = [[ProgressTextBarView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(toolbarBounds) * 0.6, CGRectGetHeight(toolbarBounds) * 0.8)];
+  UIView *textViews = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 200, 36)] autorelease];
+  [textViews addSubview:topTextView];
+  [textViews addSubview:bottomTextView];
+  
+  // Meh, can't set the width of a space in one line.
+  UIBarButtonItem *space = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil] autorelease];
+  space.width = 20;
+  
+  return [NSArray arrayWithObjects:
+          space,
+          [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
+          [[[UIBarButtonItem alloc] initWithCustomView:textViews] autorelease],
+          [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
+          [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCompose target:self action:@selector(edit:)] autorelease],
+          nil];
+}
+
+- (NSArray*)editToolbarArray
+{
+  UITextField *textField = [[[UITextField alloc] initWithFrame:CGRectMake(0, 0, 300, 27)] autorelease];
+
+  textField.delegate = self;
+  textField.backgroundColor = [UIColor clearColor];
+  textField.borderStyle = UITextBorderStyleRoundedRect;
+  textField.textColor = [UIColor blackColor];
+  textField.text = self.imageName;
+  
+  textField.autocorrectionType = UITextAutocorrectionTypeDefault;	// no auto correction support
+  textField.keyboardType = UIKeyboardTypeDefault;
+  textField.returnKeyType = UIReturnKeyDone;
+  textField.clearButtonMode = UITextFieldViewModeWhileEditing;  // has a clear 'x' button to the right
+  
+  return [NSArray arrayWithObjects:
+          [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
+          [[[UIBarButtonItem alloc] initWithCustomView:textField] autorelease],
+          [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
+          nil];
+}
+
+- (void)didShowKeyboard:(NSNotification*)notification
+{
+  if (keyboardShown)
+  {
+    return;
+  }
+  
+  NSValue *boundsValue = [[notification userInfo] objectForKey:UIKeyboardBoundsUserInfoKey];
+  CGRect keyboardBounds = [boundsValue CGRectValue];
+  CGRect toolbarFrame = toolbar.frame;
+  toolbarFrame.origin.y -= keyboardBounds.size.height;
+  toolbar.frame = toolbarFrame;
+  
+  keyboardShown = YES;
+}
+
+- (void)didHideKeyboard:(NSNotification*)notification
+{
+  NSValue *boundsValue = [[notification userInfo] objectForKey:UIKeyboardBoundsUserInfoKey];
+  CGRect keyboardBounds = [boundsValue CGRectValue];
+  CGRect toolbarFrame = toolbar.frame;
+  toolbarFrame.origin.y += keyboardBounds.size.height;
+  toolbar.frame = toolbarFrame;
+  
+  keyboardShown = NO;
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+  self.imageName = textField.text;
+  if (![[self.imageName substringWithRange:NSMakeRange([self.imageName length] - 4, 4)] isEqualToString:@".jpg"])
+  {
+    self.imageName = [self.imageName stringByAppendingString:@".jpg"];
+  }
+
+  [textField resignFirstResponder];
+  [toolbar setItems:[self normalToolbarArray] animated:YES];
+  return NO;
+}
+
+- (NSArray*)uploadToolbarArray
+{
+  ProgressTextBarView *progressTextView = [[[ProgressTextBarView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(toolbar.bounds) * 0.6, CGRectGetHeight(toolbar.bounds) * 0.8)] autorelease];
   progressTextView.textField.text = @"Initialising...";
   progressTextView.progressView.progress = 0.0;
   
-  // Set the toolbar up, <- variable space -> <- progress -> <- variable space ->
-  // Makes sure it is centered nicely
-  [toolbar setItems:[NSArray arrayWithObjects:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
-                     [[UIBarButtonItem alloc] initWithCustomView:progressTextView],
-                     [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil], nil]];
-  
-  [self updateToolbar];
-  
+  return [NSArray arrayWithObjects:
+          [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
+          [[[UIBarButtonItem alloc] initWithCustomView:progressTextView] autorelease],
+          [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
+          nil];
+}
+
+- (ProgressTextBarView*)toolbarProgressView
+{
+  id view = [[[toolbar items] objectAtIndex:1] customView];
+  if ([view isKindOfClass:[ProgressTextBarView class]])
+  {
+    return view;
+  }
+  return nil;
+}
+
+- (void)showUploadButton
+{
+  [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
+}
+
+- (void)showProgressIndicator
+{
   // Replace the "upload" button with a spinning indicator
   UIActivityIndicatorView *loadingIndicator = [[[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 25, 25)] autorelease];
   [loadingIndicator startAnimating];
@@ -98,97 +241,110 @@
   
   // Lots of stuff probably needs a display by now anyway.
   [self.navigationItem setRightBarButtonItem:loadingBarButtonItem animated:YES];
-  [self.navigationController.navigationBar drawRect:self.navigationController.navigationBar.frame];
+}
+
+- (IBAction)upload:(id)sender
+{
+  [toolbar setItems:[self uploadToolbarArray] animated:YES];
+  [self showProgressIndicator];
   
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  NSString *galleryURL = [defaults valueForKey:@"gallery_url"];
   NSString *galleryUsername = [defaults valueForKey:@"username"];
   NSString *galleryPassword = [defaults valueForKey:@"password"];
-  NSString *galleryID = [defaults valueForKey:@"albumID"];
   
-  if ((!galleryURL || !galleryUsername || !galleryPassword) ||
-      ([galleryURL isEqual:@""] || [galleryUsername isEqual:@""] || [galleryPassword isEqual:@""]))
+  if ((!galleryUsername || !galleryPassword) || ([galleryUsername isEqual:@""] || [galleryPassword isEqual:@""]))
   {
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Credentials Error" message:@"You have not setup your gallery details." delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:@"Settings", nil] autorelease];
     [alert show];
-    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
-    [self hideToolbar];
+    
+    [self showUploadButton];
+    [toolbar setItems:[self normalToolbarArray] animated:YES];
     
     return;
   }
   
-  progressTextView.textField.text = @"Logging in...";
-  progressTextView.progressView.progress += progressIncrements;
-  [self updateToolbar];
+  NSURLRequest *request = [self.gallery requestForCommandDictionary:[NSDictionary dictionaryWithObjectsAndKeys:galleryPassword, @"password", galleryUsername, @"uname", @"login", @"cmd", nil]];
+  [gallery beginAsyncRequest:request withTag:GalleryProgressLogin];
   
-  Gallery *gallery = [[Gallery alloc] initWithGalleryURL:galleryURL];
-  NSDictionary *resultDictionary = [gallery sendSynchronousCommand:[NSDictionary dictionaryWithObjectsAndKeys:galleryPassword, @"password", galleryUsername, @"uname", @"login", @"cmd", nil] error:&error];
-  NSLog(@"result %@, error %@", resultDictionary, error);
-  
-  if (error)
-  {
-    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Connection Error" message:[[error localizedDescription] capitalizedString] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
-    [alert show];
-    
-    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
-    [self hideToolbar];
-    return;
-  }
-  
-  if ([[resultDictionary valueForKey:@"status"] intValue] != 0)
-  {
-    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Gallery Error" message:[resultDictionary valueForKey:@"status_text"] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
-    [alert show];
-
-    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
-    [self hideToolbar];
-    return;
-  }
-  
-  progressTextView.textField.text = @"Rotating...";
-  progressTextView.progressView.progress += progressIncrements;
-  [self updateToolbar];
-  
-  UIImage *rotatedImage = [image rotateImage];
-  
-  progressTextView.textField.text = @"Uploading...";
-  progressTextView.progressView.progress += progressIncrements;
-  [self updateToolbar];
-  
-  resultDictionary = [gallery sendSynchronousCommand:[NSDictionary dictionaryWithObjectsAndKeys:rotatedImage, @"g2_userfile", galleryID, @"set_albumName", @"add-item", @"cmd", nil] error:&error];
-  
-  if (error)
-  {
-    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Connection Error" message:[[error localizedDescription] capitalizedString] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
-    [alert show];
-    
-    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
-    [self hideToolbar];
-    return;
-  }
-  
-  if ([[resultDictionary valueForKey:@"status"] intValue] != 0)
-  {
-    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Gallery Error" message:[resultDictionary valueForKey:@"status_text"] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
-    [alert show];
-    [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
-    [self hideToolbar];
-    return;
-  }
-  
-  [self.navigationItem setRightBarButtonItem:[[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)] autorelease] animated:YES];
-  [self hideToolbar];
+  [self toolbarProgressView].textField.text = @"Logging in...";
+  [self toolbarProgressView].progressView.progress += PROGRESS_STEPS;
 }
-  
-- (void)animationDidStop:(NSString *)animationID finished:(BOOL)flag context:(void *)context
+
+- (IBAction)edit:(id)sender
 {
-  if ([animationID isEqual:@"ToolbarHide"])
+  [toolbar setItems:[self editToolbarArray] animated:YES];
+  UIView *view = [[[toolbar items] objectAtIndex:1] customView];
+  [view becomeFirstResponder];
+}
+
+- (void)queueTagEvent:(NSNumber*)tag
+{
+  [self gallery:nil didRecieveCommandDictionary:nil withTag:[tag intValue]];
+}
+
+- (void)gallery:(Gallery*)aGallery didRecieveCommandDictionary:(NSDictionary*)dictionary withTag:(long)tag
+{
+  switch (tag)
   {
-    NSLog(@"%@, %@", animationID, context);
-    UIToolbar *contextToolbar = (UIToolbar*)context;
-    [contextToolbar removeFromSuperview];
-    [contextToolbar release];
+    case GalleryProgressLogin:
+    {
+      if ([[dictionary valueForKey:@"status"] intValue] != 0)
+      {
+        UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Gallery Error" message:[dictionary valueForKey:@"status_text"] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
+        [alert show];
+        
+        [self showUploadButton];
+        [toolbar setItems:[self normalToolbarArray] animated:YES];
+        return;
+      }
+      
+      [self toolbarProgressView].textField.text = @"Rotating...";
+      [self toolbarProgressView].progressView.progress += PROGRESS_STEPS;
+      [self performSelector:@selector(queueTagEvent:) withObject:[NSNumber numberWithInt:GalleryProgressRotate] afterDelay:0.0];
+      break;
+    }
+    case GalleryProgressRotate:
+    {
+      self.image = [image rotateImage];
+      [self performSelector:@selector(queueTagEvent:) withObject:[NSNumber numberWithInt:GalleryProgressStartUpload] afterDelay:0.0];
+      break;
+    }
+    case GalleryProgressStartUpload:
+    {
+      NSString *galleryID = [[NSUserDefaults standardUserDefaults] valueForKey:@"albumID"];
+      NSURLRequest *uploadRequest = [gallery requestForCommandDictionary:[NSDictionary dictionaryWithObjectsAndKeys:self.image, @"g2_userfile", galleryID, @"set_albumName", @"add-item", @"cmd", nil] imageName:self.imageName];
+      
+      uploadedBytes = 0;
+      totalBytes = [[uploadRequest HTTPBody] length];
+      
+      [self toolbarProgressView].textField.text = [NSString stringWithFormat:@"Uploading... (%d/%dk)", uploadedBytes / 1024, totalBytes / 1024];
+      [gallery beginAsyncRequest:uploadRequest withTag:GalleryProgressUpload];
+      break;
+    }
+    case GalleryProgressUpload:
+    {
+      [self showUploadButton];
+      [toolbar setItems:[self normalToolbarArray] animated:YES];
+      break;
+    }
+    default:
+      break;
   }
+}
+
+- (void)gallery:(Gallery*)aGallery didUploadBytes:(long)count withTag:(long)tag;
+{
+  if (tag == GalleryProgressUpload)
+  {
+    uploadedBytes += count;
+    [self performSelector:@selector(updateUploadProgress) withObject:nil afterDelay:0.0];
+  }
+}
+
+- (void)updateUploadProgress
+{
+  [self toolbarProgressView].textField.text = [NSString stringWithFormat:@"Uploading... (%dk/%dk)", uploadedBytes / 1024, totalBytes / 1024];
+  [self toolbarProgressView].progressView.progress = (PROGRESS_STEPS * 2.0) + ((2.0 * PROGRESS_STEPS) * ((float)uploadedBytes / (float)totalBytes));
 }
 
 // Implement viewDidLoad to do additional setup after loading the view.
