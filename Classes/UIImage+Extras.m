@@ -118,7 +118,7 @@
   UIImage *imageCopy = UIGraphicsGetImageFromCurrentImageContext();
   UIGraphicsEndImageContext();
   
-  return imageCopy;
+  return [imageCopy autorelease];
 }
 
 - (UIImage*)rotateImage
