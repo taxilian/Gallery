@@ -8,18 +8,19 @@
 
 #import <UIKit/UIKit.h>
 #import "Gallery.h"
+#import "ImagePicker.h"
 
 @interface GalleryAppDelegate : NSObject <UIApplicationDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate> {
 	IBOutlet UIWindow *window;
   
   UIImageView *backgroundImageView;
-  UIImagePickerController *imagePickerController;
+  ImagePicker *imagePickerController;
   
   UIViewController *rootViewController;
 }
 
 @property (nonatomic, retain) UIWindow *window;
-@property (nonatomic, retain) UIImagePickerController *imagePickerController;
+@property (nonatomic, retain) ImagePicker *imagePickerController;
 @property (nonatomic, retain) UIImageView *backgroundImageView;
 @property (nonatomic, retain) UIViewController *rootViewController;
 

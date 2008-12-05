@@ -15,6 +15,8 @@
 		28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD735F0D9D9599002E5188 /* MainWindow.xib */; };
 		C9111B6F0EE46B7800614AE1 /* AsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = C9111B6D0EE46B7800614AE1 /* AsyncSocket.m */; };
 		C9111BBD0EE46DF300614AE1 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9111BBC0EE46DF300614AE1 /* CFNetwork.framework */; };
+		C91122CA0EE7D50800614AE1 /* ImagePicker.m in Sources */ = {isa = PBXBuildFile; fileRef = C91122C90EE7D50800614AE1 /* ImagePicker.m */; };
+		C91123640EE8651100614AE1 /* PhotoLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C91123630EE8651100614AE1 /* PhotoLibrary.framework */; };
 		C9C0FE740EDAA0800017E2FD /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = C9C0FE730EDAA0800017E2FD /* Icon.png */; };
 		C9C99F2A0EDB2C1B00299CCD /* Entitlements.plist in Resources */ = {isa = PBXBuildFile; fileRef = C9C99F290EDB2C1B00299CCD /* Entitlements.plist */; };
 		C9CCE7030EDA996200E95000 /* CQPreferencesTextCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C9CCE6F60EDA996200E95000 /* CQPreferencesTextCell.m */; };
@@ -40,6 +42,9 @@
 		C9111B6D0EE46B7800614AE1 /* AsyncSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AsyncSocket.m; sourceTree = "<group>"; };
 		C9111B6E0EE46B7800614AE1 /* AsyncSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AsyncSocket.h; sourceTree = "<group>"; };
 		C9111BBC0EE46DF300614AE1 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		C91122C80EE7D50800614AE1 /* ImagePicker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImagePicker.h; path = Classes/ImagePicker.h; sourceTree = "<group>"; };
+		C91122C90EE7D50800614AE1 /* ImagePicker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ImagePicker.m; path = Classes/ImagePicker.m; sourceTree = "<group>"; };
+		C91123630EE8651100614AE1 /* PhotoLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PhotoLibrary.framework; path = System/Library/PrivateFrameworks/PhotoLibrary.framework; sourceTree = SDKROOT; };
 		C9C0FE730EDAA0800017E2FD /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		C9C99F290EDB2C1B00299CCD /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Entitlements.plist; sourceTree = "<group>"; };
 		C9CCE6F50EDA996200E95000 /* CQPreferencesTextCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CQPreferencesTextCell.h; sourceTree = "<group>"; };
@@ -67,6 +72,7 @@
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */,
 				C9111BBD0EE46DF300614AE1 /* CFNetwork.framework in Frameworks */,
+				C91123640EE8651100614AE1 /* PhotoLibrary.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,6 +125,8 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				C91122C80EE7D50800614AE1 /* ImagePicker.h */,
+				C91122C90EE7D50800614AE1 /* ImagePicker.m */,
 				C9111B6D0EE46B7800614AE1 /* AsyncSocket.m */,
 				C9111B6E0EE46B7800614AE1 /* AsyncSocket.h */,
 				28A0AAE50D9B0CCF005BE974 /* Gallery_Prefix.pch */,
@@ -141,6 +149,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C91123630EE8651100614AE1 /* PhotoLibrary.framework */,
 				C9111BBC0EE46DF300614AE1 /* CFNetwork.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
@@ -221,6 +230,7 @@
 				C9CCE7080EDA996200E95000 /* ProgressTextBarView.m in Sources */,
 				C9CCE7090EDA996200E95000 /* UIImage+Extras.m in Sources */,
 				C9111B6F0EE46B7800614AE1 /* AsyncSocket.m in Sources */,
+				C91122CA0EE7D50800614AE1 /* ImagePicker.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -232,6 +242,10 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks\"",
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -246,6 +260,10 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks\"",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Gallery_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
@@ -300,6 +318,10 @@
 				CODE_SIGN_ENTITLEMENTS = Entitlements.plist;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Matt Wright";
 				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks\"",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Gallery_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;

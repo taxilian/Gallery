@@ -11,6 +11,15 @@
 #import "iGallerySettingsController.h"
 #import "iGalleryAlbumController.h"
 
+// Need these to recognise the image controllers
+@interface PLLibraryViewController : UIViewController {
+  
+}
+
+@end
+
+@class PLAlbumViewController;
+
 @interface UIWindow (RotationPrivates)
 
 - (void)forceUpdateInterfaceOrientation;
@@ -31,7 +40,7 @@
   backgroundImageView = [[UIImageView alloc] initWithFrame:window.bounds];
   [window addSubview:backgroundImageView];
   
-  imagePickerController = [[UIImagePickerController alloc] init];
+  imagePickerController = [[ImagePicker alloc] init];
   imagePickerController.delegate = self;
   
   [window addSubview:imagePickerController.view];
@@ -73,15 +82,8 @@
 
 - (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated
 {
-  // The nav controller uses private API classes to implement its viewControllers. So we'll recognise them by className string
-  // that way I can override the contents each pane's navigation bar.
-  if (!self.rootViewController && [viewController.title isEqualToString:@"Photo Albums"])
-  {
-    self.rootViewController = viewController;
-  }
-  
   imagePickerController.rotationAllowed = NO;
-  if ([viewController isEqual:self.rootViewController])
+  if ([viewController isKindOfClass:[PLLibraryViewController class]])
   {
     viewController.title = @"Gallery";
     navigationController.navigationBar.barStyle = UIBarStyleBlackOpaque;
