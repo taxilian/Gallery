@@ -138,7 +138,7 @@ enum
 
 - (NSArray*)editToolbarArray
 {
-  UITextField *textField = [[[UITextField alloc] initWithFrame:CGRectMake(0, 0, 300, 27)] autorelease];
+  UITextField *textField = [[[UITextField alloc] initWithFrame:CGRectMake(0, 0, toolbar.bounds.size.width * 0.8, 27)] autorelease];
 
   textField.delegate = self;
   textField.backgroundColor = [UIColor clearColor];
