@@ -17,6 +17,7 @@
 		C9111BBD0EE46DF300614AE1 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9111BBC0EE46DF300614AE1 /* CFNetwork.framework */; };
 		C91122CA0EE7D50800614AE1 /* ImagePicker.m in Sources */ = {isa = PBXBuildFile; fileRef = C91122C90EE7D50800614AE1 /* ImagePicker.m */; };
 		C91123640EE8651100614AE1 /* PhotoLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C91123630EE8651100614AE1 /* PhotoLibrary.framework */; };
+		C91124150EE922EE00614AE1 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = C91124140EE922EE00614AE1 /* Default.png */; };
 		C9C0FE740EDAA0800017E2FD /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = C9C0FE730EDAA0800017E2FD /* Icon.png */; };
 		C9C99F2A0EDB2C1B00299CCD /* Entitlements.plist in Resources */ = {isa = PBXBuildFile; fileRef = C9C99F290EDB2C1B00299CCD /* Entitlements.plist */; };
 		C9CCE7030EDA996200E95000 /* CQPreferencesTextCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C9CCE6F60EDA996200E95000 /* CQPreferencesTextCell.m */; };
@@ -45,6 +46,7 @@
 		C91122C80EE7D50800614AE1 /* ImagePicker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImagePicker.h; path = Classes/ImagePicker.h; sourceTree = "<group>"; };
 		C91122C90EE7D50800614AE1 /* ImagePicker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ImagePicker.m; path = Classes/ImagePicker.m; sourceTree = "<group>"; };
 		C91123630EE8651100614AE1 /* PhotoLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PhotoLibrary.framework; path = System/Library/PrivateFrameworks/PhotoLibrary.framework; sourceTree = SDKROOT; };
+		C91124140EE922EE00614AE1 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		C9C0FE730EDAA0800017E2FD /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		C9C99F290EDB2C1B00299CCD /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Entitlements.plist; sourceTree = "<group>"; };
 		C9CCE6F50EDA996200E95000 /* CQPreferencesTextCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CQPreferencesTextCell.h; sourceTree = "<group>"; };
@@ -142,6 +144,7 @@
 				28AD735F0D9D9599002E5188 /* MainWindow.xib */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				C9C99F290EDB2C1B00299CCD /* Entitlements.plist */,
+				C91124140EE922EE00614AE1 /* Default.png */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -210,6 +213,7 @@
 				28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */,
 				C9C0FE740EDAA0800017E2FD /* Icon.png in Resources */,
 				C9C99F2A0EDB2C1B00299CCD /* Entitlements.plist in Resources */,
+				C91124150EE922EE00614AE1 /* Default.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
