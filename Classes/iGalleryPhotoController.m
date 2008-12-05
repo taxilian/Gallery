@@ -285,6 +285,12 @@ enum
 
 - (void)gallery:(Gallery*)aGallery didRecieveCommandDictionary:(NSDictionary*)dictionary withTag:(long)tag
 {
+  if (dictionary == nil)
+  {
+    // We got an error, don't continue
+    return;
+  }
+  
   switch (tag)
   {
     case GalleryProgressLogin:
@@ -331,6 +337,14 @@ enum
     default:
       break;
   }
+}
+
+- (void)gallery:(Gallery*)aGallery didError:(NSError*)error
+{
+  [self showUploadButton];
+  [toolbar setItems:[self normalToolbarArray] animated:YES];
+  
+  [[[[UIAlertView alloc] initWithTitle:@"Error" message:[error localizedDescription] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease] show];
 }
 
 - (void)gallery:(Gallery*)aGallery didUploadBytes:(long)count withTag:(long)tag;

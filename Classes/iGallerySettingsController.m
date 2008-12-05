@@ -101,8 +101,6 @@ enum
 
 - (BOOL)attemptGalleryUpdate
 {
-  //isReloading = YES;
-  //[tableView reloadData];
   [self showLoadingIndicators];
   
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -123,13 +121,19 @@ enum
   NSURLRequest *request = [gallery requestForCommandDictionary:[NSDictionary dictionaryWithObjectsAndKeys:password, @"password", username, @"uname", @"login", @"cmd", nil]];
   if (![gallery beginAsyncRequest:request withTag:GalleryProgressLogin])
   {
-    
+    return NO;
   }
   return YES;
 }
 
 - (void)gallery:(Gallery*)thisGallery didRecieveCommandDictionary:(NSDictionary*)dictionary withTag:(long)tag
 {
+  if (dictionary == nil)
+  {
+    // We got an error, just stop here
+    return;
+  }
+  
   if ([[dictionary valueForKey:@"status"] intValue] != 0)
   {
     updateWantedAlbumList = NO;
@@ -180,6 +184,15 @@ enum
       // Foo
       break;
   }
+}
+
+- (void)gallery:(Gallery*)aGallery didError:(NSError*)error
+{
+  UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error connect to Gallery" message:[error localizedDescription] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
+  [alert show];
+  
+  updateWantedAlbumList = NO;
+  [self hideLoadingIndicators];
 }
 
 - (void)displayErrorFromDictionary:(NSDictionary*)dictionary

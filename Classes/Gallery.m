@@ -123,6 +123,16 @@
   NSArray *cmdTokenArray = [connectionReturnString componentsSeparatedByString:@"\n"];
   NSMutableDictionary *mutableFormData = [NSMutableDictionary dictionary];
   
+  if (![[cmdTokenArray objectAtIndex:0] isEqualToString:@"#__GR2PROTO__"])
+  {
+    if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didError:)])
+    {
+      NSError *error = [NSError errorWithDomain:@"GalleryError" code:1001 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"No gallery found at address.", NSLocalizedDescriptionKey, nil]];
+      [[self delegate] gallery:self didError:error];
+    }
+    return nil;
+  }
+  
   for (NSString *token in cmdTokenArray)
   {
     NSArray *split = [token componentsSeparatedByString:@"="];
@@ -153,11 +163,12 @@
 
 - (BOOL)beginAsyncRequest:(NSURLRequest*)request withTag:(long)tag
 {
+  NSError *error;
   socket = [[AsyncSocket alloc] initWithDelegate:self];
-  NSURL *url = [request URL];  
+  NSURL *url = [request URL];
   int port = [[url port] intValue] != 0 ? [[url port] intValue] : 80;
   
-  if ([socket connectToHost:[url host] onPort:port error:nil])
+  if ([socket connectToHost:[url host] onPort:port error:&error])
   {
     // Async socket works with NSData but we can't serialise the data out of the NSURLRequest because its not in the API
     // so we're gonna have to copy the contents out, header by header into a CFHTTPMessageRef and then convert that to data.
@@ -189,6 +200,9 @@
     [socket setUserData:uploadChunkSize];
     [socket writeData:firstChunk withTimeout:-1 tag:tag];
     
+    // Keep this incase we need to retransmit
+    [lastRequest release];
+    lastRequest = [request retain];
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     return YES;
   }
@@ -262,6 +276,10 @@
     {
       NSData *bodyData = (NSData*)CFHTTPMessageCopyBody(messageRef);
       
+      // We got a 200, we don't need the request again
+      [lastRequest release];
+      lastRequest = nil;
+      
       // Get the body of the message, if we've less than Content-Length then we need to 
       // to wait for at least another read.
       if ([bodyData length] < [[headers valueForKey:@"Content-Length"] intValue])
@@ -280,12 +298,30 @@
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
       }
       CFRelease(bodyData);
-      CFRelease(headers);
+    }
+    else if (status == 302)
+    {
+      // Got a redirect, alter the headers and retransmit
+      NSURL *url = [NSURL URLWithString:[headers valueForKey:@"Location"]];
+      NSMutableURLRequest *request = [lastRequest mutableCopy];
+      
+      [request setURL:url];
+      [self beginAsyncRequest:request withTag:tag];
     }
     else
     {
-      NSLog(@"Socket returned status code %d (%@)", status, sock);
+      NSLog(@"%@", headers);
     }
+    CFRelease(headers);
+  }
+}
+
+- (void)onSocket:(AsyncSocket *)sock willDisconnectWithError:(NSError *)err
+{
+  [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+  if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didError:)])
+  {
+    [[self delegate] gallery:self didError:err];
   }
 }
 

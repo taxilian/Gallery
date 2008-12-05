@@ -19,6 +19,7 @@
   NSString *galleryURL;
   NSString *authToken;
   
+  NSURLRequest *lastRequest;
   CFHTTPMessageRef messageRef;
   
   int uploadChunkSize;
@@ -44,6 +45,7 @@
 @interface NSObject (GalleryDelegates)
 
 - (void)gallery:(Gallery*)gallery didRecieveCommandDictionary:(NSDictionary*)dictionary withTag:(long)tag;
-- (void)gallery:(Gallery*)aGallery didUploadBytes:(long)count withTag:(long)tag;
+- (void)gallery:(Gallery*)gallery didUploadBytes:(long)count withTag:(long)tag;
+- (void)gallery:(Gallery*)gallery didError:(NSError*)error;
 
 @end
