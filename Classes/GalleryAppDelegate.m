@@ -11,6 +11,12 @@
 #import "iGallerySettingsController.h"
 #import "iGalleryAlbumController.h"
 
+@interface UIWindow (RotationPrivates)
+
+- (void)forceUpdateInterfaceOrientation;
+
+@end
+
 @implementation GalleryAppDelegate
 
 @synthesize window;
@@ -56,6 +62,13 @@
   {
     [(iGallerySettingsController*)viewController update];
   }
+  
+  if (![viewController isKindOfClass:[iGalleryPhotoController class]] && (viewController.interfaceOrientation != UIInterfaceOrientationPortrait))
+  {
+    // Ok, nasty hack. There is no official API way to do this, so I'm gonna resort to using the closed ones.
+    [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait animated:YES];
+    [[[UIApplication sharedApplication] keyWindow] forceUpdateInterfaceOrientation];
+  }
 }
 
 - (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated
@@ -67,6 +80,7 @@
     self.rootViewController = viewController;
   }
   
+  imagePickerController.rotationAllowed = NO;
   if ([viewController isEqual:self.rootViewController])
   {
     viewController.title = @"Gallery";
@@ -84,14 +98,17 @@
   else if ([viewController isKindOfClass:[iGalleryPhotoController class]])
   {
     navigationController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
+    imagePickerController.rotationAllowed = YES;
   }
   else if ([viewController isKindOfClass:[iGallerySettingsController class]] ||
            [viewController isKindOfClass:[iGalleryAlbumController class]])
   {
+    [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait animated:YES];
     navigationController.navigationBar.barStyle = UIBarStyleBlackOpaque;
   }
   else
   {
+    [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait animated:YES];
     navigationController.navigationBar.barStyle = UIBarStyleBlackOpaque;
     [UIView beginAnimations:nil context:nil];
     [UIView setAnimationDuration:0.25];
@@ -103,9 +120,17 @@
 
 #pragma mark Image Picker Delegates
 
-- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingImage:(UIImage *)image editingInfo:(NSDictionary *)editingInfo
+- (void)autosizeBackgroundImage:(UIImage*)image
 {
-  CGRect iPhoneBounds = [[UIApplication sharedApplication] keyWindow].bounds;
+  CGRect iPhoneBounds = [[UIScreen mainScreen] bounds];
+  
+  if ([[UIApplication sharedApplication] statusBarOrientation] == UIInterfaceOrientationLandscapeRight)
+  {
+    float w = iPhoneBounds.size.height;
+    float h = iPhoneBounds.size.width;
+    iPhoneBounds.size.width = w;
+    iPhoneBounds.size.height = h;
+  }
   
   if (!CGSizeEqualToSize(image.size, iPhoneBounds.size))
   {
@@ -118,6 +143,11 @@
     
     backgroundImageView.bounds = newImageViewBounds;
   }
+}
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingImage:(UIImage *)image editingInfo:(NSDictionary *)editingInfo
+{
+  [self autosizeBackgroundImage:image];
   
   if (picker.sourceType == UIImagePickerControllerSourceTypeCamera)
   {
@@ -146,6 +176,23 @@
     picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     self.rootViewController = nil;
   }
+}
+
+- (void)application:(UIApplication *)application didChangeStatusBarOrientation:(UIInterfaceOrientation)oldStatusBarOrientation
+{
+  switch ([application statusBarOrientation])
+  {
+    case UIInterfaceOrientationLandscapeLeft:
+      backgroundImageView.transform = CGAffineTransformMakeRotation(-3.1412/2);
+      break;
+    case UIInterfaceOrientationLandscapeRight:
+      backgroundImageView.transform = CGAffineTransformMakeRotation(3.1412/2);
+      break;
+    case UIInterfaceOrientationPortrait:
+      backgroundImageView.transform = CGAffineTransformIdentity;
+      break;
+  }
+  [self autosizeBackgroundImage:backgroundImageView.image];
 }
 
 @end
