@@ -457,16 +457,28 @@ enum
 
 - (void)textFieldDidEndEditing:(UITextField *)textField
 {
-  CQPreferencesTextCell *urlCell = (CQPreferencesTextCell*)[tableView viewWithTag:urlTAG];
-  CQPreferencesTextCell *usernameCell = (CQPreferencesTextCell*)[tableView viewWithTag:usernameTAG];
-  CQPreferencesTextCell *passwordCell = (CQPreferencesTextCell*)[tableView viewWithTag:passwordTAG];
-  
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setValue:urlCell.text forKey:@"gallery_url"];
-  [defaults setValue:usernameCell.text forKey:@"username"];
-  [defaults setValue:passwordCell.text forKey:@"password"];
-  
-  [defaults synchronize];
+  if ([textField isDescendantOfView:[tableView viewWithTag:urlTAG]])
+  {
+    CQPreferencesTextCell *cell = (CQPreferencesTextCell*)[tableView viewWithTag:urlTAG];
+    NSString *url = ([cell.text rangeOfString:@"http://"].location == NSNotFound) ? [@"http://" stringByAppendingString:cell.text] : cell.text;
+    cell.text = url;
+    [[NSUserDefaults standardUserDefaults] setValue:url forKey:@"gallery_url"];
+  }
+  else if ([textField isDescendantOfView:[tableView viewWithTag:usernameTAG]])
+  {
+    CQPreferencesTextCell *cell = (CQPreferencesTextCell*)[tableView viewWithTag:usernameTAG];
+    [[NSUserDefaults standardUserDefaults] setValue:cell.text forKey:@"username"];
+  }
+  else if ([textField isDescendantOfView:[tableView viewWithTag:passwordTAG]])
+  {
+    CQPreferencesTextCell *cell = (CQPreferencesTextCell*)[tableView viewWithTag:passwordTAG];
+    [[NSUserDefaults standardUserDefaults] setValue:cell.text forKey:@"password"];    
+  }
+  else
+  {
+    NSLog(@"Warning: textFieldDidEndEditing not expected. (%@)", textField);
+  }
+  [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
