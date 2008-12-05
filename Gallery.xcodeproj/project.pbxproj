@@ -316,7 +316,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_ENTITLEMENTS = Entitlements.plist;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Matt Wright";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Matt Wright";
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -326,7 +326,7 @@
 				GCC_PREFIX_HEADER = Gallery_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = Gallery;
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "0DB4708B-63F1-47C5-A41C-153FBE87C2CD";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "47C975BF-5794-4757-BE68-D1533FD9A58B";
 			};
 			name = Distribution;
 		};
