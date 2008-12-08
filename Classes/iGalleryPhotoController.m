@@ -59,7 +59,7 @@ enum
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didHideKeyboard:) name:@"UIKeyboardDidHideNotification" object:nil];
   
   self.title = @"Gallery";
-  self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(upload:)];
+  [self showUploadButton];
   
   // Init the gallery object
   self.gallery = [[Gallery alloc] initWithGalleryURL:[[NSUserDefaults standardUserDefaults] valueForKey:@"gallery_url"] delegate:self];
@@ -227,21 +227,9 @@ enum
 }
 
 - (void)showProgressIndicator
-{
-  // Replace the "upload" button with a spinning indicator
-  UIActivityIndicatorView *loadingIndicator = [[[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 25, 25)] autorelease];
-  [loadingIndicator startAnimating];
-  [loadingIndicator sizeToFit];
-  loadingIndicator.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin |
-                                       UIViewAutoresizingFlexibleRightMargin |
-                                       UIViewAutoresizingFlexibleTopMargin |
-                                       UIViewAutoresizingFlexibleBottomMargin);
-  
-  UIBarButtonItem *loadingBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:loadingIndicator];
-  loadingBarButtonItem.style = UIBarButtonItemStyleBordered;
-  
-  // Lots of stuff probably needs a display by now anyway.
-  [self.navigationItem setRightBarButtonItem:loadingBarButtonItem animated:YES];
+{ 
+  // Just clear the button now, instead of showing an indicator. We've already got a progress bar and the network indicator to go off.
+  [self.navigationItem setRightBarButtonItem:nil animated:YES];
 }
 
 - (IBAction)upload:(id)sender
@@ -313,6 +301,7 @@ enum
     case GalleryProgressRotate:
     {
       self.image = [image rotateImage];
+      [self toolbarProgressView].textField.text = [NSString stringWithFormat:@"Connecting..."];
       [self performSelector:@selector(queueTagEvent:) withObject:[NSNumber numberWithInt:GalleryProgressStartUpload] afterDelay:0.0];
       break;
     }
@@ -321,10 +310,7 @@ enum
       NSString *galleryID = [[NSUserDefaults standardUserDefaults] valueForKey:@"albumID"];
       NSURLRequest *uploadRequest = [gallery requestForCommandDictionary:[NSDictionary dictionaryWithObjectsAndKeys:self.image, @"g2_userfile", galleryID, @"set_albumName", @"add-item", @"cmd", nil] imageName:self.imageName];
       
-      uploadedBytes = 0;
-      totalBytes = [[uploadRequest HTTPBody] length];
-      
-      [self toolbarProgressView].textField.text = [NSString stringWithFormat:@"Uploading... (%d/%dk)", uploadedBytes / 1024, totalBytes / 1024];
+      uploadedBytes = 0;      
       [gallery beginAsyncRequest:uploadRequest withTag:GalleryProgressUpload];
       break;
     }
