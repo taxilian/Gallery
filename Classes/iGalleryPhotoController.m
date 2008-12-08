@@ -285,16 +285,16 @@ enum
 
 - (void)gallery:(Gallery*)aGallery didRecieveCommandDictionary:(NSDictionary*)dictionary withTag:(long)tag
 {
-  if (dictionary == nil)
-  {
-    // We got an error, don't continue
-    return;
-  }
-  
   switch (tag)
   {
     case GalleryProgressLogin:
     {
+      if (dictionary == nil)
+      {
+        // We got an error, don't continue
+        return;
+      }
+            
       if ([[dictionary valueForKey:@"status"] intValue] != 0)
       {
         UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Gallery Error" message:[dictionary valueForKey:@"status_text"] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];

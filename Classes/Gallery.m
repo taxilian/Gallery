@@ -168,6 +168,15 @@
   NSURL *url = [request URL];
   int port = [[url port] intValue] != 0 ? [[url port] intValue] : 80;
   
+  if (![url host] || ![url scheme] || (port == 0))
+  {
+    if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didError:)])
+    {
+      [[self delegate] gallery:self didError:[NSError errorWithDomain:@"GalleryDomain" code:1002 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"Invalid URL in request.", NSLocalizedDescriptionKey, nil]]];
+    }
+    return NO;
+  }
+  
   if ([socket connectToHost:[url host] onPort:port error:&error])
   {
     // Async socket works with NSData but we can't serialise the data out of the NSURLRequest because its not in the API

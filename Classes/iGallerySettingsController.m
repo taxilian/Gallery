@@ -188,7 +188,7 @@ enum
 
 - (void)gallery:(Gallery*)aGallery didError:(NSError*)error
 {
-  UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error connect to Gallery" message:[error localizedDescription] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
+  UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error connecting to Gallery" message:[error localizedDescription] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
   [alert show];
   
   updateWantedAlbumList = NO;
