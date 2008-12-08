@@ -314,6 +314,9 @@
       NSURL *url = [NSURL URLWithString:[headers valueForKey:@"Location"]];
       NSMutableURLRequest *request = [lastRequest mutableCopy];
       
+      // Set our galleryURL to the new location, otherwise we're gonna send the entire photo twice.
+      self.galleryURL = [[headers valueForKey:@"Location"] stringByReplacingOccurrencesOfString:@"?g2_controller=remote:GalleryRemote" withString:@""];
+
       [request setURL:url];
       [self beginAsyncRequest:request withTag:tag];
     }
