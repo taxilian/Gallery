@@ -236,9 +236,9 @@
 - (void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag
 {
   // Tell our delegate that we've uploaded some data
-  if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didUploadBytes:withTag:)])
+  if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didUploadBytes:bytesRemaining:withTag:)])
   {
-    [[self delegate] gallery:self didUploadBytes:[sock userData] withTag:tag];
+    [[self delegate] gallery:self didUploadBytes:[sock userData] bytesRemaining:[uploadData length] withTag:tag];
   }
 
   if ([uploadData length] > 0)

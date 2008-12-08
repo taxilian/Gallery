@@ -347,11 +347,12 @@ enum
   [[[[UIAlertView alloc] initWithTitle:@"Error" message:[error localizedDescription] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease] show];
 }
 
-- (void)gallery:(Gallery*)aGallery didUploadBytes:(long)count withTag:(long)tag;
+- (void)gallery:(Gallery*)gallery didUploadBytes:(long)count bytesRemaining:(long)remaining withTag:(long)tag
 {
   if (tag == GalleryProgressUpload)
   {
     uploadedBytes += count;
+    totalBytes = uploadedBytes + remaining;
     [self performSelector:@selector(updateUploadProgress) withObject:nil afterDelay:0.0];
   }
 }

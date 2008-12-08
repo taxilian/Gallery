@@ -45,7 +45,7 @@
 @interface NSObject (GalleryDelegates)
 
 - (void)gallery:(Gallery*)gallery didRecieveCommandDictionary:(NSDictionary*)dictionary withTag:(long)tag;
-- (void)gallery:(Gallery*)gallery didUploadBytes:(long)count withTag:(long)tag;
+- (void)gallery:(Gallery*)gallery didUploadBytes:(long)count bytesRemaining:(long)remaining withTag:(long)tag;
 - (void)gallery:(Gallery*)gallery didError:(NSError*)error;
 
 @end
