@@ -188,6 +188,13 @@ enum
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
   self.imageName = textField.text;
+  if ([self.imageName isEqual:@""])
+  {
+    // Generate an image name based on the current date
+    NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
+    [dateFormatter setDateFormat:@"ddMMyy-HHmm"];
+    self.imageName = [NSString stringWithFormat:@"iPhone-%@.jpg", [[dateFormatter stringFromDate:[NSDate date]] stringByReplacingOccurrencesOfString:@" " withString:@""]];
+  }
   if (![[self.imageName substringWithRange:NSMakeRange([self.imageName length] - 4, 4)] isEqualToString:@".jpg"])
   {
     self.imageName = [self.imageName stringByAppendingString:@".jpg"];
