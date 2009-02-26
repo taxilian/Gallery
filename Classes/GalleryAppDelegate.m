@@ -11,6 +11,8 @@
 #import "iGallerySettingsController.h"
 #import "iGalleryAlbumController.h"
 
+#import "Beacon.h"
+
 // Need these to recognise the image controllers
 @interface PLLibraryViewController : UIViewController {
   
@@ -34,6 +36,8 @@
 @synthesize rootViewController;
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
+  [Beacon initAndStartBeaconWithApplicationCode:@"7cb67f8268de949c106fdcd678419d7e" useCoreLocation:NO useOnlyWiFi:NO];
+  
   application.statusBarStyle = UIStatusBarStyleBlackTranslucent;
   window.backgroundColor = [UIColor blackColor];
   

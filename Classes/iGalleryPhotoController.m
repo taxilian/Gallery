@@ -259,11 +259,11 @@ enum
     return;
   }
   
-  NSURLRequest *request = [self.gallery requestForCommandDictionary:[NSDictionary dictionaryWithObjectsAndKeys:galleryPassword, @"password", galleryUsername, @"uname", @"login", @"cmd", nil]];
-  [gallery beginAsyncRequest:request withTag:GalleryProgressLogin];
-  
   [self toolbarProgressView].textField.text = @"Logging in...";
   [self toolbarProgressView].progressView.progress += PROGRESS_STEPS;
+
+  NSURLRequest *request = [self.gallery requestForCommandDictionary:[NSDictionary dictionaryWithObjectsAndKeys:galleryPassword, @"password", galleryUsername, @"uname", @"login", @"cmd", nil]];
+  [gallery beginAsyncRequest:request withTag:GalleryProgressLogin];
 }
 
 - (IBAction)edit:(id)sender

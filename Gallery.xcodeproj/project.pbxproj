@@ -18,6 +18,10 @@
 		C91122CA0EE7D50800614AE1 /* ImagePicker.m in Sources */ = {isa = PBXBuildFile; fileRef = C91122C90EE7D50800614AE1 /* ImagePicker.m */; };
 		C91123640EE8651100614AE1 /* PhotoLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C91123630EE8651100614AE1 /* PhotoLibrary.framework */; };
 		C91124150EE922EE00614AE1 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = C91124140EE922EE00614AE1 /* Default.png */; };
+		C9A314880F56972500D91A0E /* libPMAnalytics-r36.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A314870F56972500D91A0E /* libPMAnalytics-r36.a */; };
+		C9A3148A0F56974700D91A0E /* libsqlite3.0.8.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A314890F56974700D91A0E /* libsqlite3.0.8.6.dylib */; };
+		C9A3148C0F56974E00D91A0E /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A3148B0F56974E00D91A0E /* SystemConfiguration.framework */; };
+		C9A314900F56975000D91A0E /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A3148F0F56975000D91A0E /* CoreLocation.framework */; };
 		C9C0FE740EDAA0800017E2FD /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = C9C0FE730EDAA0800017E2FD /* Icon.png */; };
 		C9C99F2A0EDB2C1B00299CCD /* Entitlements.plist in Resources */ = {isa = PBXBuildFile; fileRef = C9C99F290EDB2C1B00299CCD /* Entitlements.plist */; };
 		C9CCE7030EDA996200E95000 /* CQPreferencesTextCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C9CCE6F60EDA996200E95000 /* CQPreferencesTextCell.m */; };
@@ -47,6 +51,11 @@
 		C91122C90EE7D50800614AE1 /* ImagePicker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ImagePicker.m; path = Classes/ImagePicker.m; sourceTree = "<group>"; };
 		C91123630EE8651100614AE1 /* PhotoLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PhotoLibrary.framework; path = System/Library/PrivateFrameworks/PhotoLibrary.framework; sourceTree = SDKROOT; };
 		C91124140EE922EE00614AE1 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
+		C9A314860F56972500D91A0E /* Beacon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Beacon.h; sourceTree = "<group>"; };
+		C9A314870F56972500D91A0E /* libPMAnalytics-r36.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libPMAnalytics-r36.a"; sourceTree = "<group>"; };
+		C9A314890F56974700D91A0E /* libsqlite3.0.8.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.8.6.dylib; path = usr/lib/libsqlite3.0.8.6.dylib; sourceTree = SDKROOT; };
+		C9A3148B0F56974E00D91A0E /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		C9A3148F0F56975000D91A0E /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		C9C0FE730EDAA0800017E2FD /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		C9C99F290EDB2C1B00299CCD /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Entitlements.plist; sourceTree = "<group>"; };
 		C9CCE6F50EDA996200E95000 /* CQPreferencesTextCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CQPreferencesTextCell.h; sourceTree = "<group>"; };
@@ -75,6 +84,10 @@
 				2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */,
 				C9111BBD0EE46DF300614AE1 /* CFNetwork.framework in Frameworks */,
 				C91123640EE8651100614AE1 /* PhotoLibrary.framework in Frameworks */,
+				C9A314880F56972500D91A0E /* libPMAnalytics-r36.a in Frameworks */,
+				C9A3148A0F56974700D91A0E /* libsqlite3.0.8.6.dylib in Frameworks */,
+				C9A3148C0F56974E00D91A0E /* SystemConfiguration.framework in Frameworks */,
+				C9A314900F56975000D91A0E /* CoreLocation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -117,9 +130,13 @@
 			children = (
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
+				C9A314800F56970D00D91A0E /* Pinch */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
+				C9A314890F56974700D91A0E /* libsqlite3.0.8.6.dylib */,
+				C9A3148B0F56974E00D91A0E /* SystemConfiguration.framework */,
+				C9A3148F0F56975000D91A0E /* CoreLocation.framework */,
 			);
 			name = CustomTemplate;
 			sourceTree = "<group>";
@@ -159,6 +176,15 @@
 				2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		C9A314800F56970D00D91A0E /* Pinch */ = {
+			isa = PBXGroup;
+			children = (
+				C9A314860F56972500D91A0E /* Beacon.h */,
+				C9A314870F56972500D91A0E /* libPMAnalytics-r36.a */,
+			);
+			path = Pinch;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -255,6 +281,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Gallery_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Pinch\"",
+				);
 				PRODUCT_NAME = Gallery;
 			};
 			name = Debug;
@@ -271,6 +301,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Gallery_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Pinch\"",
+				);
 				PRODUCT_NAME = Gallery;
 			};
 			name = Release;
@@ -279,13 +313,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_ENTITLEMENTS = Entitlements.plist;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
-				SDKROOT = iphoneos2.2;
+				SDKROOT = iphoneos2.2.1;
 			};
 			name = Debug;
 		};
@@ -293,25 +328,63 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_ENTITLEMENTS = Entitlements.plist;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = iphoneos2.2;
+				SDKROOT = iphoneos2.2.1;
 			};
 			name = Release;
+		};
+		C9A314C30F57188200D91A0E /* Appstore */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_ENTITLEMENTS = Entitlements.plist;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Matt Wright";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "CD651D18-0C29-4661-A7A5-927DFFA1182C";
+				SDKROOT = iphoneos2.2.1;
+			};
+			name = Appstore;
+		};
+		C9A314C40F57188200D91A0E /* Appstore */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks\"",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Gallery_Prefix.pch;
+				INFOPLIST_FILE = Info.plist;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Pinch\"",
+				);
+				PRODUCT_NAME = Gallery;
+			};
+			name = Appstore;
 		};
 		C9C0FF390EDB2A0E0017E2FD /* Distribution */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_ENTITLEMENTS = Entitlements.plist;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Matt Wright";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = iphoneos2.2;
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "47C975BF-5794-4757-BE68-D1533FD9A58B";
+				SDKROOT = iphoneos2.2.1;
 			};
 			name = Distribution;
 		};
@@ -329,6 +402,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Gallery_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Pinch\"",
+				);
 				PRODUCT_NAME = Gallery;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "47C975BF-5794-4757-BE68-D1533FD9A58B";
 			};
@@ -343,6 +420,7 @@
 				1D6058940D05DD3E006BFB54 /* Debug */,
 				1D6058950D05DD3E006BFB54 /* Release */,
 				C9C0FF3A0EDB2A0E0017E2FD /* Distribution */,
+				C9A314C40F57188200D91A0E /* Appstore */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -353,6 +431,7 @@
 				C01FCF4F08A954540054247B /* Debug */,
 				C01FCF5008A954540054247B /* Release */,
 				C9C0FF390EDB2A0E0017E2FD /* Distribution */,
+				C9A314C30F57188200D91A0E /* Appstore */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
