@@ -7,6 +7,7 @@
 //
 
 #import "Gallery.h"
+#import <netdb.h>
 
 @interface Gallery (GalleryPrivate)
 
@@ -207,7 +208,7 @@
     uploadData = [[data subdataWithRange:NSMakeRange(uploadChunkSize, [data length] - uploadChunkSize)] retain];
     
     [socket setUserData:uploadChunkSize];
-    [socket writeData:firstChunk withTimeout:-1 tag:tag];
+    [socket writeData:firstChunk withTimeout:CONNECTION_TIMEOUT tag:tag];
     
     // Keep this incase we need to retransmit
     [lastRequest release];
@@ -249,7 +250,7 @@
     uploadData = [[[uploadData autorelease] subdataWithRange:NSMakeRange(chunkSize, [uploadData length] - chunkSize)] retain];
     
     [sock setUserData:chunkSize];
-    [sock writeData:nextChunk withTimeout:-1 tag:tag];
+    [sock writeData:nextChunk withTimeout:CONNECTION_TIMEOUT tag:tag];
   }
   else
   {
@@ -257,7 +258,7 @@
     [uploadData release];
     uploadData = nil;
     
-    [sock readDataWithTimeout:-1 tag:tag];
+    [sock readDataWithTimeout:CONNECTION_TIMEOUT tag:tag];
   }
 }
 
@@ -293,7 +294,7 @@
       // to wait for at least another read.
       if ([bodyData length] < [[headers valueForKey:@"Content-Length"] intValue])
       {
-        [sock readDataWithTimeout:-1 tag:tag];
+        [sock readDataWithTimeout:CONNECTION_TIMEOUT tag:tag];
       }
       else
       {
@@ -331,6 +332,27 @@
 - (void)onSocket:(AsyncSocket *)sock willDisconnectWithError:(NSError *)err
 {
   [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+  
+  if ([[err domain] isEqualToString:AsyncSocketErrorDomain])
+  {
+    switch ([err code])
+    {
+      case AsyncSocketReadTimeoutError:
+      case AsyncSocketWriteTimeoutError:
+        err = [NSError errorWithDomain:[err domain] code:[err code] userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"No internet connection found. Please try again.", NSLocalizedDescriptionKey, nil]];
+        break;
+    }
+  }
+  else if ([[err domain] isEqualToString:@"kCFStreamErrorDomainNetDB"])
+  {
+    switch ([err code])
+    {
+      case EAI_NONAME:
+        err = [NSError errorWithDomain:[err domain] code:[err code] userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"No internet connection found. Please try again.", NSLocalizedDescriptionKey, nil]];
+        break;
+    }
+  }
+  
   if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didError:)])
   {
     [[self delegate] gallery:self didError:err];

@@ -16,7 +16,6 @@
 		C9111B6F0EE46B7800614AE1 /* AsyncSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = C9111B6D0EE46B7800614AE1 /* AsyncSocket.m */; };
 		C9111BBD0EE46DF300614AE1 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9111BBC0EE46DF300614AE1 /* CFNetwork.framework */; };
 		C91122CA0EE7D50800614AE1 /* ImagePicker.m in Sources */ = {isa = PBXBuildFile; fileRef = C91122C90EE7D50800614AE1 /* ImagePicker.m */; };
-		C91123640EE8651100614AE1 /* PhotoLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C91123630EE8651100614AE1 /* PhotoLibrary.framework */; };
 		C91124150EE922EE00614AE1 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = C91124140EE922EE00614AE1 /* Default.png */; };
 		C9A314880F56972500D91A0E /* libPMAnalytics-r36.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A314870F56972500D91A0E /* libPMAnalytics-r36.a */; };
 		C9A3148A0F56974700D91A0E /* libsqlite3.0.8.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A314890F56974700D91A0E /* libsqlite3.0.8.6.dylib */; };
@@ -49,7 +48,6 @@
 		C9111BBC0EE46DF300614AE1 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		C91122C80EE7D50800614AE1 /* ImagePicker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImagePicker.h; path = Classes/ImagePicker.h; sourceTree = "<group>"; };
 		C91122C90EE7D50800614AE1 /* ImagePicker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ImagePicker.m; path = Classes/ImagePicker.m; sourceTree = "<group>"; };
-		C91123630EE8651100614AE1 /* PhotoLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PhotoLibrary.framework; path = System/Library/PrivateFrameworks/PhotoLibrary.framework; sourceTree = SDKROOT; };
 		C91124140EE922EE00614AE1 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		C9A314860F56972500D91A0E /* Beacon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Beacon.h; sourceTree = "<group>"; };
 		C9A314870F56972500D91A0E /* libPMAnalytics-r36.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libPMAnalytics-r36.a"; sourceTree = "<group>"; };
@@ -83,7 +81,6 @@
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */,
 				C9111BBD0EE46DF300614AE1 /* CFNetwork.framework in Frameworks */,
-				C91123640EE8651100614AE1 /* PhotoLibrary.framework in Frameworks */,
 				C9A314880F56972500D91A0E /* libPMAnalytics-r36.a in Frameworks */,
 				C9A3148A0F56974700D91A0E /* libsqlite3.0.8.6.dylib in Frameworks */,
 				C9A3148C0F56974E00D91A0E /* SystemConfiguration.framework in Frameworks */,
@@ -169,7 +166,6 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				C91123630EE8651100614AE1 /* PhotoLibrary.framework */,
 				C9111BBC0EE46DF300614AE1 /* CFNetwork.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
@@ -313,13 +309,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_ENTITLEMENTS = Entitlements.plist;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_ENTITLEMENTS = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Matt Wright";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "0DB4708B-63F1-47C5-A41C-153FBE87C2CD";
 				SDKROOT = iphoneos2.2.1;
 			};
 			name = Debug;

@@ -11,15 +11,11 @@
 #import "iGallerySettingsController.h"
 #import "iGalleryAlbumController.h"
 
+extern const char * class_getName(Class cls);
+
 #import "Beacon.h"
 
-// Need these to recognise the image controllers
-@interface PLLibraryViewController : UIViewController {
-  
-}
-
-@end
-
+@class PLLibraryViewController;
 @class PLAlbumViewController;
 
 @interface UIWindow (RotationPrivates)
@@ -87,7 +83,7 @@
 - (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated
 {
   imagePickerController.rotationAllowed = NO;
-  if ([viewController isKindOfClass:[PLLibraryViewController class]])
+  if (!strcmp(class_getName([viewController class]), "PLLibraryViewController"))
   {
     viewController.title = @"Gallery";
     navigationController.navigationBar.barStyle = UIBarStyleBlackOpaque;

@@ -10,6 +10,8 @@
 #import <CFNetwork/CFNetwork.h>
 #import "AsyncSocket.h"
 
+#define CONNECTION_TIMEOUT  15.0f
+
 @interface Gallery : NSObject {
   AsyncSocket *socket;
   id delegate;
