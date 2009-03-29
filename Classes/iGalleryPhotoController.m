@@ -354,7 +354,7 @@ enum
   [self showUploadButton];
   [toolbar setItems:[self normalToolbarArray] animated:YES];
   
-  if ([[error domain] isEqualTo:@"GalleryDomain"])
+  if ([[error domain] isEqual:@"GalleryDomain"])
   {
     switch ([error code])
     {

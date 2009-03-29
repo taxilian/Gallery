@@ -468,7 +468,7 @@ enum
     CQPreferencesTextCell *cell = (CQPreferencesTextCell*)[tableView viewWithTag:urlTAG];
     NSString *cellString = [cell.text copy];
     
-    if ([cellString isNotEqualTo:@""])
+    if (![cellString isEqualToString:@""])
     {
       cellString = ([cellString rangeOfString:@"http://"].location == NSNotFound) ? [@"http://" stringByAppendingString:cellString] : cellString;
     }
