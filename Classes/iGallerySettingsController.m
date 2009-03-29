@@ -15,6 +15,8 @@
 #define usernameTAG 2
 #define passwordTAG 3
 
+NSString *const IGSettingsDidChangeNotification = @"IGSettingsDidChangeNotification";
+
 enum 
 {
   GalleryProgressLogin,
@@ -288,6 +290,7 @@ enum
       [[cell textField] setDelegate:self];
       [[cell textField] setReturnKeyType:UIReturnKeyDone];
       [[cell textField] setTag:urlTAG];
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textFieldTextDidChangeNotification:) name:UITextFieldTextDidChangeNotification object:[cell textField]];
       
       [cell setText:[[NSUserDefaults standardUserDefaults] stringForKey:@"gallery_url"]];
 
@@ -311,6 +314,7 @@ enum
 
       [[cell textField] setDelegate:self];
       [[cell textField] setReturnKeyType:UIReturnKeyDone];
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textFieldTextDidChangeNotification:) name:UITextFieldTextDidChangeNotification object:[cell textField]];
       
       switch ([indexPath indexAtPosition:1])
       {
@@ -455,14 +459,20 @@ enum
 
 #pragma mark Textview Delegates
 
-- (void)textFieldDidEndEditing:(UITextField *)textField
+- (void)textFieldTextDidChangeNotification:(NSNotification*)notification
 {
+  UITextField *textField = [notification object];
+  
   if ([textField isDescendantOfView:[tableView viewWithTag:urlTAG]])
   {
     CQPreferencesTextCell *cell = (CQPreferencesTextCell*)[tableView viewWithTag:urlTAG];
-    NSString *url = ([cell.text rangeOfString:@"http://"].location == NSNotFound) ? [@"http://" stringByAppendingString:cell.text] : cell.text;
-    cell.text = url;
-    [[NSUserDefaults standardUserDefaults] setValue:url forKey:@"gallery_url"];
+    NSString *cellString = [cell.text copy];
+    
+    if ([cellString isNotEqualTo:@""])
+    {
+      cellString = ([cellString rangeOfString:@"http://"].location == NSNotFound) ? [@"http://" stringByAppendingString:cellString] : cellString;
+    }
+    [[NSUserDefaults standardUserDefaults] setValue:cellString forKey:@"gallery_url"];
   }
   else if ([textField isDescendantOfView:[tableView viewWithTag:usernameTAG]])
   {
@@ -472,13 +482,14 @@ enum
   else if ([textField isDescendantOfView:[tableView viewWithTag:passwordTAG]])
   {
     CQPreferencesTextCell *cell = (CQPreferencesTextCell*)[tableView viewWithTag:passwordTAG];
-    [[NSUserDefaults standardUserDefaults] setValue:cell.text forKey:@"password"];    
+    [[NSUserDefaults standardUserDefaults] setValue:cell.text forKey:@"password"];
   }
   else
   {
     NSLog(@"Warning: textFieldDidEndEditing not expected. (%@)", textField);
   }
   [[NSUserDefaults standardUserDefaults] synchronize];
+  [[NSNotificationCenter defaultCenter] postNotificationName:IGSettingsDidChangeNotification object:nil];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField

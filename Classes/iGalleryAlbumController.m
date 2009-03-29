@@ -7,7 +7,7 @@
 //
 
 #import "iGalleryAlbumController.h"
-
+#import "iGallerySettingsController.h"
 
 @implementation iGalleryAlbumController
 
@@ -94,6 +94,7 @@
   [defaults setValue:[selectedItemDictionary valueForKey:@"name"] forKey:@"albumID"];
   [defaults setValue:[selectedItemDictionary valueForKey:@"title"] forKey:@"albumTitle"];
   [defaults synchronize];
+  [[NSNotificationCenter defaultCenter] postNotificationName:IGSettingsDidChangeNotification object:nil];
 }
 
 /*

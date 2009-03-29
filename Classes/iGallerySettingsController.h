@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "Gallery.h"
 
+NSString* const IGSettingsDidChangeNotification;
+
 @interface iGallerySettingsController : UIViewController <UITableViewDataSource, UITextFieldDelegate, UITableViewDelegate> {
   Gallery *gallery;
   

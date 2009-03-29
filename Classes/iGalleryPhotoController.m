@@ -7,6 +7,7 @@
 //
 
 #import "iGalleryPhotoController.h"
+#import "iGallerySettingsController.h"
 #import "ProgressTextBarView.h"
 #import "UIImage+Extras.h"
 
@@ -57,6 +58,8 @@ enum
   
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didShowKeyboard:) name:@"UIKeyboardDidShowNotification" object:nil];
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didHideKeyboard:) name:@"UIKeyboardDidHideNotification" object:nil];
+  
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gallerySettingsDidChange:) name:IGSettingsDidChangeNotification object:nil];
   
   self.title = @"Gallery";
   [self showUploadButton];
@@ -278,6 +281,11 @@ enum
   [self gallery:nil didRecieveCommandDictionary:nil withTag:[tag intValue]];
 }
 
+- (void)gallerySettingsDidChange:(NSNotification*)notification
+{
+  [self.gallery setGalleryURL:[[NSUserDefaults standardUserDefaults] valueForKey:@"gallery_url"]];
+}
+
 - (void)gallery:(Gallery*)aGallery didRecieveCommandDictionary:(NSDictionary*)dictionary withTag:(long)tag
 {
   switch (tag)
@@ -292,7 +300,16 @@ enum
             
       if ([[dictionary valueForKey:@"status"] intValue] != 0)
       {
-        UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Gallery Error" message:[dictionary valueForKey:@"status_text"] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
+        UIAlertView *alert;
+        switch ([[dictionary valueForKey:@"status"] intValue])
+        {
+          case 201:
+            alert = [[[UIAlertView alloc] initWithTitle:@"Gallery Error" message:[dictionary valueForKey:@"status_text"] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:@"Settings", nil] autorelease];
+            break;
+          default:
+            alert = [[[UIAlertView alloc] initWithTitle:@"Gallery Error" message:[dictionary valueForKey:@"status_text"] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease];
+            break;
+        }
         [alert show];
         
         [self showUploadButton];
@@ -337,7 +354,18 @@ enum
   [self showUploadButton];
   [toolbar setItems:[self normalToolbarArray] animated:YES];
   
-  [[[[UIAlertView alloc] initWithTitle:@"Error" message:[error localizedDescription] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease] show];
+  if ([[error domain] isEqualTo:@"GalleryDomain"])
+  {
+    switch ([error code])
+    {
+      case 1001:
+      case 1002:
+        [[[[UIAlertView alloc] initWithTitle:@"Error" message:[error localizedDescription] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:@"Settings", nil] autorelease] show];
+        return;
+        break;
+    }
+  }
+  [[[[UIAlertView alloc] initWithTitle:@"Error" message:[error localizedDescription] delegate:self cancelButtonTitle:@"Dismiss" otherButtonTitles:nil] autorelease] show]; 
 }
 
 - (void)gallery:(Gallery*)gallery didUploadBytes:(long)count bytesRemaining:(long)remaining withTag:(long)tag
@@ -347,6 +375,15 @@ enum
     uploadedBytes += count;
     totalBytes = uploadedBytes + remaining;
     [self performSelector:@selector(updateUploadProgress) withObject:nil afterDelay:0.0];
+  }
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+  if (buttonIndex == 1)
+  {
+    UINavigationController *nav = [self navigationController];
+    [nav pushViewController:[[[iGallerySettingsController alloc] init] autorelease] animated:YES];
   }
 }
 

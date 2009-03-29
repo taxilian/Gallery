@@ -123,12 +123,11 @@
   
   NSArray *cmdTokenArray = [connectionReturnString componentsSeparatedByString:@"\n"];
   NSMutableDictionary *mutableFormData = [NSMutableDictionary dictionary];
-  
   if (![[cmdTokenArray objectAtIndex:0] isEqualToString:@"#__GR2PROTO__"])
   {
     if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didError:)])
     {
-      NSError *error = [NSError errorWithDomain:@"GalleryError" code:1001 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"No gallery found at address.", NSLocalizedDescriptionKey, nil]];
+      NSError *error = [NSError errorWithDomain:@"GalleryDomain" code:1001 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"No gallery found at address, or invalid response received.", NSLocalizedDescriptionKey, nil]];
       [[self delegate] gallery:self didError:error];
     }
     return nil;
@@ -173,7 +172,7 @@
   {
     if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didError:)])
     {
-      [[self delegate] gallery:self didError:[NSError errorWithDomain:@"GalleryDomain" code:1002 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"Invalid URL in request.", NSLocalizedDescriptionKey, nil]]];
+      [[self delegate] gallery:self didError:[NSError errorWithDomain:@"GalleryDomain" code:1002 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"Invalid Gallery URL provided.", NSLocalizedDescriptionKey, nil]]];
     }
     return NO;
   }
