@@ -13,7 +13,6 @@
 
 @synthesize rotationAllowed;
 
-/*
 // The designated initializer. Override to perform setup that is required before the view is loaded.
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
@@ -21,24 +20,22 @@
     }
     return self;
 }
-*/
 
-/*
 // Implement loadView to create a view hierarchy programmatically, without using a nib.
-- (void)loadView {
+- (void)loadView 
+{
+  [super loadView];
 }
-*/
 
-/*
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
-- (void)viewDidLoad {
-    [super viewDidLoad];
+- (void)viewDidLoad 
+{
+  [super viewDidLoad];
 }
-*/
 
 // Override to allow orientations other than the default portrait orientation.
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-    // Return YES for supported orientations
+  // Return YES for supported orientations
   if (rotationAllowed)
   {
     return ((interfaceOrientation == UIInterfaceOrientationPortrait) ||

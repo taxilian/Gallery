@@ -76,14 +76,19 @@ extern const char * class_getName(Class cls);
   {
     // Ok, nasty hack. There is no official API way to do this, so I'm gonna resort to using the closed ones.
     [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait animated:YES];
-    [[[UIApplication sharedApplication] keyWindow] forceUpdateInterfaceOrientation];
+    if ([[[UIApplication sharedApplication] keyWindow] respondsToSelector:@selector(forceUpdateInterfaceOrientation)])
+    {
+      [[[UIApplication sharedApplication] keyWindow] forceUpdateInterfaceOrientation];
+    }
   }
 }
 
 - (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated
 {
   imagePickerController.rotationAllowed = NO;
-  if (!strcmp(class_getName([viewController class]), "PLLibraryViewController"))
+  if (!strcmp(class_getName([viewController class]), "PLLibraryViewController") ||
+      // The class was renamed in 3.0
+      !strcmp(class_getName([viewController class]), "PLUILibraryViewController"))
   {
     viewController.title = @"Gallery";
     navigationController.navigationBar.barStyle = UIBarStyleBlackOpaque;
@@ -160,7 +165,7 @@ extern const char * class_getName(Class cls);
     UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
   }
   
-  iGalleryPhotoController *photoController = [[[iGalleryPhotoController alloc] init] autorelease];
+  iGalleryPhotoController *photoController = [[[iGalleryPhotoController alloc] initWithNibName:nil bundle:nil] autorelease];
   photoController.image = image;
   
   [UIView beginAnimations:nil context:nil];
