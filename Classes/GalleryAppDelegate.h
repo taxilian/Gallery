@@ -26,5 +26,10 @@
 
 - (IBAction)camera:(id)sender;
 
+#pragma mark Debug Functions
+
+- (void)_printUIViewTree:(UIView*)view;
+- (void)_printUIViewTree:(UIView*)view withPrefixWhitespace:(NSString*)whitespace;
+
 @end
 

@@ -202,4 +202,21 @@ extern const char * class_getName(Class cls);
   [self autosizeBackgroundImage:backgroundImageView.image];
 }
 
+#pragma mark Debug Functions
+
+- (void)_printUIViewTree:(UIView*)view
+{
+  [self _printUIViewTree:view withPrefixWhitespace:@""];
+}
+
+- (void)_printUIViewTree:(UIView*)view withPrefixWhitespace:(NSString*)whitespace
+{
+  NSLog(@"%@View: %@, %@", whitespace, view, NSStringFromCGRect([view frame]));
+  for (UIView *subView in [view subviews])
+  {
+    [self _printUIViewTree:subView withPrefixWhitespace:[whitespace stringByAppendingString:@"\t"]];
+  }
+  NSLog(@"%@ViewEnd: %@", whitespace, view);
+}
+
 @end
