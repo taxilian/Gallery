@@ -123,7 +123,20 @@
   
   NSArray *cmdTokenArray = [connectionReturnString componentsSeparatedByString:@"\n"];
   NSMutableDictionary *mutableFormData = [NSMutableDictionary dictionary];
-  if (![[cmdTokenArray objectAtIndex:0] isEqualToString:@"#__GR2PROTO__"])
+  
+  int cmdTokenStart = 0;
+  BOOL foundCmdTokenStart = NO;
+  
+  for (cmdTokenStart = 0; cmdTokenStart < [cmdTokenArray count]; cmdTokenStart++)
+  {
+    if ([[cmdTokenArray objectAtIndex:cmdTokenStart] isEqual:@"#__GR2PROTO__"])
+    {
+      foundCmdTokenStart = YES;
+      break;
+    }
+  }
+  
+  if (!foundCmdTokenStart)
   {
     if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didError:)])
     {
@@ -135,6 +148,12 @@
   
   for (NSString *token in cmdTokenArray)
   {
+    if (cmdTokenStart > 0)
+    {
+      cmdTokenStart--;
+      continue;
+    }
+    
     NSArray *split = [token componentsSeparatedByString:@"="];
     if (split.count > 1)
     {
@@ -206,6 +225,10 @@
     NSData *firstChunk = [data subdataWithRange:NSMakeRange(0, uploadChunkSize)];
     uploadData = [[data subdataWithRange:NSMakeRange(uploadChunkSize, [data length] - uploadChunkSize)] retain];
     
+    // So we dont have a "tag" when we know we've disconnected from the remote host,
+    // so store it here so we can return it to the delegate later.
+    connectionTag = tag;
+    
     [socket setUserData:uploadChunkSize];
     [socket writeData:firstChunk withTimeout:CONNECTION_TIMEOUT tag:tag];
     
@@ -269,18 +292,59 @@
     messageRef = CFHTTPMessageCreateEmpty(kCFAllocatorDefault, NO);
   }
   CFHTTPMessageAppendBytes(messageRef, [data bytes], [data length]);
+  [sock readDataWithTimeout:CONNECTION_TIMEOUT tag:tag];
+}
+
+- (void)onSocket:(AsyncSocket *)sock willDisconnectWithError:(NSError *)err
+{
+  if (err)
+  {
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    
+    if ([[err domain] isEqualToString:AsyncSocketErrorDomain])
+    {
+      switch ([err code])
+      {
+        case AsyncSocketReadTimeoutError:
+        case AsyncSocketWriteTimeoutError:
+          err = [NSError errorWithDomain:[err domain] code:[err code] userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"No internet connection found. Please try again.", NSLocalizedDescriptionKey, nil]];
+          break;
+      }
+    }
+    else if ([[err domain] isEqualToString:@"kCFStreamErrorDomainNetDB"])
+    {
+      switch ([err code])
+      {
+        case EAI_NONAME:
+          err = [NSError errorWithDomain:[err domain] code:[err code] userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"No internet connection found. Please try again.", NSLocalizedDescriptionKey, nil]];
+          break;
+      }
+    }
+    
+    if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didError:)])
+    {
+      [[self delegate] gallery:self didError:err];
+    }
+  }
+}
+
+- (void)onSocketDidDisconnect:(AsyncSocket *)sock
+{
+  NSDictionary *commandDict = nil;
   
-  if (CFHTTPMessageIsHeaderComplete(messageRef))
+  if ((messageRef) && CFHTTPMessageIsHeaderComplete(messageRef))
   {
     unsigned int status = CFHTTPMessageGetResponseStatusCode(messageRef);
-
+    
     // We need the session ID from gallery, so I need the headers to pass to NSHTTPCookieStorage
     NSDictionary *headers = (NSDictionary*)CFHTTPMessageCopyAllHeaderFields(messageRef);
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@?g2_controller=remote:GalleryRemote", galleryURL]];
     
     NSArray *cookies = [NSHTTPCookie cookiesWithResponseHeaderFields:headers forURL:url];
     [[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookies:cookies forURL:url mainDocumentURL:nil];
-        
+    
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+
     if (status == 200)
     {
       NSData *bodyData = (NSData*)CFHTTPMessageCopyBody(messageRef);
@@ -289,23 +353,13 @@
       [lastRequest release];
       lastRequest = nil;
       
-      // Get the body of the message, if we've less than Content-Length then we need to 
-      // to wait for at least another read.
-      if ([bodyData length] < [[headers valueForKey:@"Content-Length"] intValue])
-      {
-        [sock readDataWithTimeout:CONNECTION_TIMEOUT tag:tag];
-      }
-      else
-      {
-        CFRelease(messageRef);
-        messageRef = nil;
-        
-        if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didRecieveCommandDictionary:withTag:)])
-        {
-          [[self delegate] gallery:self didRecieveCommandDictionary:[self commandDictionaryFromData:bodyData] withTag:tag];
-        }
-        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-      }
+      // Tell the socket to disconnect when its finished
+      [sock disconnectAfterReadingAndWriting];
+      
+      CFRelease(messageRef);
+      messageRef = nil;
+      
+      commandDict = [self commandDictionaryFromData:bodyData];
       CFRelease(bodyData);
     }
     else if (status == 302)
@@ -316,9 +370,9 @@
       
       // Set our galleryURL to the new location, otherwise we're gonna send the entire photo twice.
       self.galleryURL = [[headers valueForKey:@"Location"] stringByReplacingOccurrencesOfString:@"?g2_controller=remote:GalleryRemote" withString:@""];
-
+      
       [request setURL:url];
-      [self beginAsyncRequest:request withTag:tag];
+      [self beginAsyncRequest:request withTag:connectionTag];
     }
     else
     {
@@ -326,36 +380,13 @@
     }
     CFRelease(headers);
   }
-}
 
-- (void)onSocket:(AsyncSocket *)sock willDisconnectWithError:(NSError *)err
-{
-  [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-  
-  if ([[err domain] isEqualToString:AsyncSocketErrorDomain])
+  messageRef = nil;
+  if (commandDict && [self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didRecieveCommandDictionary:withTag:)])
   {
-    switch ([err code])
-    {
-      case AsyncSocketReadTimeoutError:
-      case AsyncSocketWriteTimeoutError:
-        err = [NSError errorWithDomain:[err domain] code:[err code] userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"No internet connection found. Please try again.", NSLocalizedDescriptionKey, nil]];
-        break;
-    }
-  }
-  else if ([[err domain] isEqualToString:@"kCFStreamErrorDomainNetDB"])
-  {
-    switch ([err code])
-    {
-      case EAI_NONAME:
-        err = [NSError errorWithDomain:[err domain] code:[err code] userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"No internet connection found. Please try again.", NSLocalizedDescriptionKey, nil]];
-        break;
-    }
+    [[self delegate] gallery:self didRecieveCommandDictionary:commandDict withTag:connectionTag];
   }
   
-  if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didError:)])
-  {
-    [[self delegate] gallery:self didError:err];
-  }
 }
 
 @end

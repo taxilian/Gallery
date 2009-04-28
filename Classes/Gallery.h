@@ -25,6 +25,7 @@
   CFHTTPMessageRef messageRef;
   
   int uploadChunkSize;
+  int connectionTag;
 }
 
 @property (nonatomic,retain) NSString *galleryURL;

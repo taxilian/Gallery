@@ -17,6 +17,7 @@
 		C9111BBD0EE46DF300614AE1 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9111BBC0EE46DF300614AE1 /* CFNetwork.framework */; };
 		C91122CA0EE7D50800614AE1 /* ImagePicker.m in Sources */ = {isa = PBXBuildFile; fileRef = C91122C90EE7D50800614AE1 /* ImagePicker.m */; };
 		C91124150EE922EE00614AE1 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = C91124140EE922EE00614AE1 /* Default.png */; };
+		C9574B6B0FA773850022254C /* NSArray+Extras.m in Sources */ = {isa = PBXBuildFile; fileRef = C9574B6A0FA773850022254C /* NSArray+Extras.m */; };
 		C9A314880F56972500D91A0E /* libPMAnalytics-r36.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A314870F56972500D91A0E /* libPMAnalytics-r36.a */; };
 		C9A3148C0F56974E00D91A0E /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A3148B0F56974E00D91A0E /* SystemConfiguration.framework */; };
 		C9A314900F56975000D91A0E /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A3148F0F56975000D91A0E /* CoreLocation.framework */; };
@@ -49,6 +50,8 @@
 		C91122C80EE7D50800614AE1 /* ImagePicker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ImagePicker.h; path = Classes/ImagePicker.h; sourceTree = "<group>"; };
 		C91122C90EE7D50800614AE1 /* ImagePicker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ImagePicker.m; path = Classes/ImagePicker.m; sourceTree = "<group>"; };
 		C91124140EE922EE00614AE1 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
+		C9574B690FA773850022254C /* NSArray+Extras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+Extras.h"; sourceTree = "<group>"; };
+		C9574B6A0FA773850022254C /* NSArray+Extras.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+Extras.m"; sourceTree = "<group>"; };
 		C9A314860F56972500D91A0E /* Beacon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Beacon.h; sourceTree = "<group>"; };
 		C9A314870F56972500D91A0E /* libPMAnalytics-r36.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libPMAnalytics-r36.a"; sourceTree = "<group>"; };
 		C9A3148B0F56974E00D91A0E /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
@@ -110,6 +113,8 @@
 				C9CCE7020EDA996200E95000 /* UIImage+Extras.m */,
 				1D3623240D0F684500981E51 /* GalleryAppDelegate.h */,
 				1D3623250D0F684500981E51 /* GalleryAppDelegate.m */,
+				C9574B690FA773850022254C /* NSArray+Extras.h */,
+				C9574B6A0FA773850022254C /* NSArray+Extras.m */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -140,8 +145,8 @@
 			children = (
 				C91122C80EE7D50800614AE1 /* ImagePicker.h */,
 				C91122C90EE7D50800614AE1 /* ImagePicker.m */,
-				C9111B6D0EE46B7800614AE1 /* AsyncSocket.m */,
 				C9111B6E0EE46B7800614AE1 /* AsyncSocket.h */,
+				C9111B6D0EE46B7800614AE1 /* AsyncSocket.m */,
 				28A0AAE50D9B0CCF005BE974 /* Gallery_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
 			);
@@ -257,6 +262,7 @@
 				C9CCE7090EDA996200E95000 /* UIImage+Extras.m in Sources */,
 				C9111B6F0EE46B7800614AE1 /* AsyncSocket.m in Sources */,
 				C91122CA0EE7D50800614AE1 /* ImagePicker.m in Sources */,
+				C9574B6B0FA773850022254C /* NSArray+Extras.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

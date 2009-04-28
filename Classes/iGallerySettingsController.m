@@ -11,6 +11,8 @@
 #import "iGalleryAlbumController.h"
 #import "CQPreferencesTextCell.h"
 
+#import "NSArray+Extras.h"
+
 #define urlTAG 1
 #define usernameTAG 2
 #define passwordTAG 3
