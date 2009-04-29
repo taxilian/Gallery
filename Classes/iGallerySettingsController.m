@@ -122,6 +122,9 @@ enum
   }
   self.gallery.galleryURL = url;
   
+  [gallery setUsername:username];
+  [gallery setPassword:password];
+  
   NSURLRequest *request = [gallery requestForCommandDictionary:[NSDictionary dictionaryWithObjectsAndKeys:password, @"password", username, @"uname", @"login", @"cmd", nil]];
   if (![gallery beginAsyncRequest:request withTag:GalleryProgressLogin])
   {

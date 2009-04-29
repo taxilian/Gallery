@@ -21,15 +21,23 @@
   NSString *galleryURL;
   NSString *authToken;
   
+  NSString *username;
+  NSString *password;
+  
   NSURLRequest *lastRequest;
   CFHTTPMessageRef messageRef;
   
   int uploadChunkSize;
   int connectionTag;
+  
+  BOOL haveAttemptedHTTPAuth;
 }
 
 @property (nonatomic,retain) NSString *galleryURL;
 @property (nonatomic,assign) id delegate;
+
+@property (retain) NSString *username;
+@property (retain) NSString *password;
 
 - (id)initWithGalleryURL:(NSString*)url;
 - (id)initWithGalleryURL:(NSString*)url delegate:(id)delegate;

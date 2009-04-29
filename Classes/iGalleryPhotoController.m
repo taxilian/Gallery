@@ -262,6 +262,9 @@ enum
     return;
   }
   
+  [gallery setUsername:galleryUsername];
+  [gallery setPassword:galleryPassword];
+  
   [self toolbarProgressView].textField.text = @"Logging in...";
   [self toolbarProgressView].progressView.progress += PROGRESS_STEPS;
 
@@ -345,6 +348,7 @@ enum
       break;
     }
     default:
+      NSLog(@"Unknown tag, received dictionary: %@", dictionary);
       break;
   }
 }

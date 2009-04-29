@@ -7,6 +7,8 @@
 //
 
 #import "Gallery.h"
+#import "NSData+Extras.h"
+
 #import <netdb.h>
 
 @interface Gallery (GalleryPrivate)
@@ -19,6 +21,8 @@
 
 @synthesize galleryURL;
 @synthesize delegate;
+@synthesize username;
+@synthesize password;
 
 - (id)initWithGalleryURL:(NSString*)url
 {
@@ -33,6 +37,7 @@
     self.delegate = aDelegate;
     
     messageRef = nil;
+    haveAttemptedHTTPAuth = NO;
   }
   return self;
 }
@@ -358,6 +363,7 @@
       
       CFRelease(messageRef);
       messageRef = nil;
+      haveAttemptedHTTPAuth = NO;
       
       commandDict = [self commandDictionaryFromData:bodyData];
       CFRelease(bodyData);
@@ -374,13 +380,40 @@
       [request setURL:url];
       [self beginAsyncRequest:request withTag:connectionTag];
     }
+    else if (status == 401)
+    {
+      if (!haveAttemptedHTTPAuth)
+      {
+        NSMutableURLRequest *request = [lastRequest mutableCopy];
+        
+        NSString *authString = [NSString stringWithFormat:@"Basic %@", [[[NSString stringWithFormat:@"%@:%@", username, password] dataUsingEncoding:NSUTF8StringEncoding] base64Encoding]];
+        [request setValue:authString forHTTPHeaderField:@"Authorization"];
+        
+        haveAttemptedHTTPAuth = YES;
+        [self beginAsyncRequest:request withTag:connectionTag];
+      }
+      else
+      {
+        haveAttemptedHTTPAuth = NO;
+        if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didError:)])
+        {
+          NSError *error = [NSError errorWithDomain:@"GalleryDomain" code:1004 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"The username or password you supplied have been rejected. Please check your details and try again.", NSLocalizedDescriptionKey, nil]];
+          [[self delegate] gallery:self didError:error];
+        }
+      }      
+    }
     else
     {
-      NSLog(@"%@", headers);
+      haveAttemptedHTTPAuth = NO;
+      if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didError:)])
+      {
+        NSError *error = [NSError errorWithDomain:@"GalleryDomain" code:1003 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"Invalid response received from server. Please check your Gallery setup is working correctly.", NSLocalizedDescriptionKey, nil]];
+        [[self delegate] gallery:self didError:error];
+      }
     }
     CFRelease(headers);
   }
-
+  
   messageRef = nil;
   if (commandDict && [self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didRecieveCommandDictionary:withTag:)])
   {
