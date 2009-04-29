@@ -26,6 +26,10 @@
 
 - (IBAction)camera:(id)sender;
 
+#pragma mark Subview Drilling Functions
+
+- (UIView*)subViewOf:(UIView*)view atIndex:(int)index ofClass:(Class)aClass;
+
 #pragma mark Debug Functions
 
 - (void)_printUIViewTree:(UIView*)view;

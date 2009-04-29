@@ -11,6 +11,8 @@
 #import "iGallerySettingsController.h"
 #import "iGalleryAlbumController.h"
 
+#import "UIDevice+Extras.h"
+
 extern const char * class_getName(Class cls);
 
 #import "Beacon.h"
@@ -81,6 +83,23 @@ extern const char * class_getName(Class cls);
       [[[UIApplication sharedApplication] keyWindow] forceUpdateInterfaceOrientation];
     }
   }
+  
+  // Some 3.0 UIView hacks
+  if ([[UIDevice currentDevice] isVersionThreePointOS])
+  {
+    if ((!strcmp(class_getName([viewController class]), "PLUILibraryViewController")) ||
+        (!strcmp(class_getName([viewController class]), "PLUIAlbumViewController")))
+    {
+      UIScrollView *scrollView = (UIScrollView*)[self subViewOf:viewController.view atIndex:0 ofClass:[UITableView class]];
+      UIEdgeInsets insets = [scrollView contentInset];
+      
+      if (insets.top >= 64.0)
+      {
+        insets.top -= 64.0f;
+        [scrollView setContentInset:insets];
+      }
+    }
+  }
 }
 
 - (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated
@@ -100,7 +119,6 @@ extern const char * class_getName(Class cls);
     {
       viewController.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(camera:)];
     }
-    
   }
   else if ([viewController isKindOfClass:[iGalleryPhotoController class]])
   {
@@ -200,6 +218,29 @@ extern const char * class_getName(Class cls);
       break;
   }
   [self autosizeBackgroundImage:backgroundImageView.image];
+}
+
+#pragma mark Subview Drilling Functions
+
+- (UIView*)subViewOf:(UIView*)view atIndex:(int)index ofClass:(Class)aClass
+{
+  NSMutableArray *subViewArray = [NSMutableArray array];
+  
+  for (UIView *subview in view.subviews)
+  {
+    if ([subview isKindOfClass:aClass])
+    {
+      [subViewArray addObject:subview];
+    }
+  }
+  
+  if (index < [subViewArray count])
+  {
+    return [subViewArray objectAtIndex:index];
+  }
+  
+  [[NSException exceptionWithName:@"SubviewNotFound" reason:@"Requested subview not found in view." userInfo:nil] raise];
+  return nil;
 }
 
 #pragma mark Debug Functions
