@@ -57,7 +57,7 @@ enum
   [super loadView];
   
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didShowKeyboard:) name:@"UIKeyboardDidShowNotification" object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didHideKeyboard:) name:@"UIKeyboardDidHideNotification" object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willHideKeyboard:) name:@"UIKeyboardWillHideNotification" object:nil];
   
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gallerySettingsDidChange:) name:IGSettingsDidChangeNotification object:nil];
   
@@ -85,7 +85,13 @@ enum
   [self.view addSubview:toolbar];
   
   [toolbar setItems:[self normalToolbarArray] animated:YES];
+  
+  normalToolbarArray = [[self normalToolbarArray] retain];
+  editToolbarArray = [[self editToolbarArray] retain];
+  uploadToolbarArray = [[self uploadToolbarArray] retain];
 }
+
+#pragma mark Show/Hide Toolbars
 
 - (void)showToolbars
 {
@@ -105,15 +111,19 @@ enum
   [UIView commitAnimations];  
 }
 
+#pragma mark Toolbar Generation
+
 - (NSArray*)normalToolbarArray
 {
-    
   UILabel *topTextView = [[[UILabel alloc] initWithFrame:CGRectMake(0, 0, 200, 18)] autorelease];
   topTextView.backgroundColor = [UIColor clearColor];
   topTextView.text = self.imageName;
   topTextView.textAlignment = UITextAlignmentCenter;
   topTextView.font = [UIFont boldSystemFontOfSize:[UIFont smallSystemFontSize]];
   topTextView.textColor = [UIColor whiteColor];
+  
+  // Yeah hacky, i know
+  imageNameTextField = [topTextView retain];
   
   UILabel *bottomTextView = [[[UILabel alloc] initWithFrame:CGRectMake(0, 18, 200, 18)] autorelease];
   bottomTextView.backgroundColor = [UIColor clearColor];
@@ -161,6 +171,20 @@ enum
           nil];
 }
 
+
+- (NSArray*)uploadToolbarArray
+{
+  ProgressTextBarView *progressTextView = [[[ProgressTextBarView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(toolbar.bounds) * 0.6, CGRectGetHeight(toolbar.bounds) * 0.8)] autorelease];
+  progressTextView.textField.text = @"Initialising...";
+  progressTextView.progressView.progress = 0.0;
+  
+  return [NSArray arrayWithObjects:
+          [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
+          [[[UIBarButtonItem alloc] initWithCustomView:progressTextView] autorelease],
+          [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
+          nil];
+}
+
 - (void)didShowKeyboard:(NSNotification*)notification
 {
   if (keyboardShown)
@@ -177,7 +201,7 @@ enum
   keyboardShown = YES;
 }
 
-- (void)didHideKeyboard:(NSNotification*)notification
+- (void)willHideKeyboard:(NSNotification*)notification
 {
   NSValue *boundsValue = [[notification userInfo] objectForKey:UIKeyboardBoundsUserInfoKey];
   CGRect keyboardBounds = [boundsValue CGRectValue];
@@ -202,23 +226,11 @@ enum
   {
     self.imageName = [self.imageName stringByAppendingString:@".jpg"];
   }
+  imageNameTextField.text = self.imageName;
 
   [textField resignFirstResponder];
-  [toolbar setItems:[self normalToolbarArray] animated:YES];
+  [toolbar setItems:normalToolbarArray animated:YES];
   return NO;
-}
-
-- (NSArray*)uploadToolbarArray
-{
-  ProgressTextBarView *progressTextView = [[[ProgressTextBarView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(toolbar.bounds) * 0.6, CGRectGetHeight(toolbar.bounds) * 0.8)] autorelease];
-  progressTextView.textField.text = @"Initialising...";
-  progressTextView.progressView.progress = 0.0;
-  
-  return [NSArray arrayWithObjects:
-          [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
-          [[[UIBarButtonItem alloc] initWithCustomView:progressTextView] autorelease],
-          [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
-          nil];
 }
 
 - (ProgressTextBarView*)toolbarProgressView
@@ -244,7 +256,7 @@ enum
 
 - (IBAction)upload:(id)sender
 {
-  [toolbar setItems:[self uploadToolbarArray] animated:YES];
+  [toolbar setItems:uploadToolbarArray animated:YES];
   [self showProgressIndicator];
   
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -257,7 +269,7 @@ enum
     [alert show];
     
     [self showUploadButton];
-    [toolbar setItems:[self normalToolbarArray] animated:YES];
+    [toolbar setItems:normalToolbarArray animated:YES];
     
     return;
   }
@@ -274,7 +286,7 @@ enum
 
 - (IBAction)edit:(id)sender
 {
-  [toolbar setItems:[self editToolbarArray] animated:YES];
+  [toolbar setItems:editToolbarArray animated:YES];
   UIView *view = [[[toolbar items] objectAtIndex:1] customView];
   [view becomeFirstResponder];
 }
@@ -316,7 +328,7 @@ enum
         [alert show];
         
         [self showUploadButton];
-        [toolbar setItems:[self normalToolbarArray] animated:YES];
+        [toolbar setItems:normalToolbarArray animated:YES];
         return;
       }
       
@@ -328,7 +340,7 @@ enum
     case GalleryProgressRotate:
     {
       self.image = [image rotateImage];
-      [self toolbarProgressView].textField.text = [NSString stringWithFormat:@"Connecting..."];
+      [self toolbarProgressView].textField.text = [NSString stringWithFormat:@"Uploading..."];
       [self performSelector:@selector(queueTagEvent:) withObject:[NSNumber numberWithInt:GalleryProgressStartUpload] afterDelay:0.0];
       break;
     }
@@ -344,7 +356,7 @@ enum
     case GalleryProgressUpload:
     {
       [self showUploadButton];
-      [toolbar setItems:[self normalToolbarArray] animated:YES];
+      [toolbar setItems:normalToolbarArray animated:YES];
       break;
     }
     default:
@@ -356,7 +368,7 @@ enum
 - (void)gallery:(Gallery*)aGallery didError:(NSError*)error
 {
   [self showUploadButton];
-  [toolbar setItems:[self normalToolbarArray] animated:YES];
+  [toolbar setItems:normalToolbarArray animated:YES];
   
   if ([[error domain] isEqual:@"GalleryDomain"])
   {
@@ -421,7 +433,13 @@ enum
 }
 
 
-- (void)dealloc {
+- (void)dealloc 
+{
+  [imageNameTextField release];
+  [uploadToolbarArray release];
+  [normalToolbarArray release];
+  [editToolbarArray release];
+  
   [image release];
   [super dealloc];
 }

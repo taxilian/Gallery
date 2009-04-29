@@ -15,6 +15,13 @@
   UIImage *image;
   UIToolbar *toolbar;
   
+  // toolbar views
+  UITextField *imageNameTextField;
+  
+  NSArray *normalToolbarArray;
+  NSArray *editToolbarArray;
+  NSArray *uploadToolbarArray;
+  
   NSString *imageName;
   
   int uploadedBytes;
@@ -29,5 +36,11 @@
 @property (nonatomic, retain) UIToolbar *toolbar;
 
 @property (nonatomic, retain) NSString *imageName;
+
+#pragma mark Toolbar Generation
+
+- (NSArray*)normalToolbarArray;
+- (NSArray*)editToolbarArray;
+- (NSArray*)uploadToolbarArray;
 
 @end
