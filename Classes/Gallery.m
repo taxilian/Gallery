@@ -202,7 +202,7 @@
     // so we're gonna have to copy the contents out, header by header into a CFHTTPMessageRef and then convert that to data.
     messageRef = CFHTTPMessageCreateRequest(kCFAllocatorDefault, (CFStringRef)@"POST", (CFURLRef)url, kCFHTTPVersion1_1);
     CFHTTPMessageSetHeaderFieldValue(messageRef, (CFStringRef)@"Host", (CFStringRef)[url host]);
-    CFHTTPMessageSetHeaderFieldValue(messageRef, (CFStringRef)@"User-Agent", (CFStringRef)@"Gallery 1.0/iPhone");
+    CFHTTPMessageSetHeaderFieldValue(messageRef, (CFStringRef)@"User-Agent", (CFStringRef)@"Gallery Remote");
     
     NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookiesForURL:url];
     NSDictionary *requestHeaders = [NSHTTPCookie requestHeaderFieldsWithCookies:cookies];

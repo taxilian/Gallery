@@ -389,7 +389,14 @@ enum
 
 - (void)updateUploadProgress
 {
-  [self toolbarProgressView].textField.text = [NSString stringWithFormat:@"Uploading... (%dk/%dk)", uploadedBytes / 1024, totalBytes / 1024];
+  if (uploadedBytes == totalBytes)
+  {
+    [self toolbarProgressView].textField.text = [NSString stringWithFormat:@"Finishing..."];
+  }
+  else
+  {
+    [self toolbarProgressView].textField.text = [NSString stringWithFormat:@"Uploading... (%dk/%dk)", uploadedBytes / 1024, totalBytes / 1024];
+  }
   [self toolbarProgressView].progressView.progress = (PROGRESS_STEPS * 2.0) + ((2.0 * PROGRESS_STEPS) * ((float)uploadedBytes / (float)totalBytes));
 }
 
