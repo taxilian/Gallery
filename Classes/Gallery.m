@@ -11,6 +11,14 @@
 
 #import <netdb.h>
 
+//#define LOG_CONNECTIONS   1
+
+#ifdef LOG_CONNECTIONS
+# define ConnLog(x...) NSLog(@"ConnLog: %@", [NSString stringWithFormat:x])
+#else
+# define ConnLog(x, ...)
+#endif
+
 @interface Gallery (GalleryPrivate)
 
 - (void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag;
@@ -192,6 +200,8 @@
   NSURL *url = [request URL];
   int port = [[url port] intValue] != 0 ? [[url port] intValue] : 80;
   
+  ConnLog(@"Begin request");
+  
   if (![url host] || ![url scheme] || (port == 0))
   {
     if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didError:)])
@@ -241,9 +251,10 @@
     [lastRequest release];
     lastRequest = [request retain];
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    ConnLog(@"Request started.");
     return YES;
   }
-  NSLog(@"Failed to connect.");
+  ConnLog(@"Failed to connect.");
   return NO;
 }
 
@@ -278,14 +289,17 @@
     
     [sock setUserData:chunkSize];
     [sock writeData:nextChunk withTimeout:CONNECTION_TIMEOUT tag:tag];
+    ConnLog(@"Written data");
   }
   else
   {
+    ConnLog(@"Data sent.");
     // We've sent something, probably need to read the response now
     [uploadData release];
     uploadData = nil;
     
     [sock readDataWithTimeout:CONNECTION_TIMEOUT tag:tag];
+    ConnLog(@"Read started.");
   }
 }
 
@@ -298,6 +312,9 @@
   }
   CFHTTPMessageAppendBytes(messageRef, [data bytes], [data length]);
   [sock readDataWithTimeout:CONNECTION_TIMEOUT tag:tag];
+  
+  [sock disconnectAfterReadingAndWriting];
+  ConnLog(@"Data read.");
 }
 
 - (void)onSocket:(AsyncSocket *)sock willDisconnectWithError:(NSError *)err
@@ -336,6 +353,7 @@
 - (void)onSocketDidDisconnect:(AsyncSocket *)sock
 {
   NSDictionary *commandDict = nil;
+  ConnLog(@"Socket disconnected.");
   
   if ((messageRef) && CFHTTPMessageIsHeaderComplete(messageRef))
   {
@@ -419,7 +437,7 @@
   {
     [[self delegate] gallery:self didRecieveCommandDictionary:commandDict withTag:connectionTag];
   }
-  
+  ConnLog(@"Request done.");
 }
 
 @end
