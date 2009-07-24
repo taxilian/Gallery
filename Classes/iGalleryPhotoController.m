@@ -47,31 +47,58 @@ enum
 
 @end
 
+#pragma mark -
+
 @implementation iGalleryPhotoController
 
 @synthesize gallery;
 @synthesize image;
 @synthesize toolbar;
+@synthesize actionItem;
+@synthesize editNameItem;
 @synthesize imageName;
+@synthesize imageID;
 
 // Override initWithNibName:bundle: to load the view using a nib file then perform additional customization that is not appropriate for viewDidLoad.
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil 
 {
     if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) 
     {
-      // Custom initialization
+      self.gallery = nil;
+      
+      self.image = nil;
+      self.toolbar = nil;
+      
+      // toolbar views
+      imageNameTextField = nil;
+      
+      normalToolbarArray = nil;
+      editToolbarArray = nil;
+      uploadToolbarArray = nil;
+      
+      self.actionItem = nil;
+      self.editNameItem = nil;
+      self.imageName = nil;
+      self.imageID = nil;
+      
+      uploadedBytes = 0;
+      totalBytes = 0;
+      
+      keyboardShown = NO;
     }
     return self;
 }
 
 // Implement loadView to create a view hierarchy programmatically.
-- (void)loadView {
+- (void)loadView 
+{
   [super loadView];
   
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didShowKeyboard:) name:@"UIKeyboardDidShowNotification" object:nil];
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willHideKeyboard:) name:@"UIKeyboardWillHideNotification" object:nil];
   
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(gallerySettingsDidChange:) name:IGSettingsDidChangeNotification object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceChangedOrientation:) name:UIDeviceOrientationDidChangeNotification object:nil];
   
   self.title = @"Gallery";
   [self showUploadButton];
@@ -96,13 +123,47 @@ enum
   [toolbar setFrame:CGRectMake(CGRectGetMinX(viewBounds), CGRectGetMinY(viewBounds) + CGRectGetHeight(viewBounds) - toolbarHeight, CGRectGetWidth(viewBounds), toolbarHeight)];  
   [self.view addSubview:toolbar];
   
-  [toolbar setItems:[self normalToolbarArray] animated:YES];
-  
   normalToolbarArray = [[self normalToolbarArray] retain];
   editToolbarArray = [[self editToolbarArray] retain];
   uploadToolbarArray = [[self uploadToolbarArray] retain];
+
+  [toolbar setItems:normalToolbarArray animated:YES];
 }
 
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation 
+{
+  return ((interfaceOrientation == UIInterfaceOrientationPortrait) || (interfaceOrientation == UIInterfaceOrientationLandscapeRight) || (interfaceOrientation == UIInterfaceOrientationLandscapeLeft));
+}
+
+- (void)didReceiveMemoryWarning {
+  [super didReceiveMemoryWarning]; // Releases the view if it doesn't have a superview
+  // Release anything that's not essential, such as cached data
+}
+
+- (void)dealloc 
+{
+  NSLog(@"dealloc");
+  self.gallery = nil;
+  
+  self.image = nil;
+  self.toolbar = nil;
+  
+  // toolbar views
+  [imageNameTextField release];
+  
+  [normalToolbarArray release];
+  [editToolbarArray release];
+  [uploadToolbarArray release];
+  
+  self.actionItem = nil;
+  self.editNameItem = nil;
+  self.imageName = nil;
+  self.imageID = nil;
+  
+  [super dealloc];
+}
+
+#pragma mark -
 #pragma mark Show/Hide Toolbars
 
 - (void)showToolbars
@@ -123,6 +184,7 @@ enum
   [UIView commitAnimations];  
 }
 
+#pragma mark -
 #pragma mark Toolbar Generation
 
 - (NSArray*)normalToolbarArray
@@ -148,16 +210,16 @@ enum
   [textViews addSubview:topTextView];
   [textViews addSubview:bottomTextView];
   
-  // Meh, can't set the width of a space in one line.
-  UIBarButtonItem *space = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil] autorelease];
-  space.width = 20;
+  self.actionItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(action:)] autorelease];
+  self.editNameItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCompose target:self action:@selector(edit:)] autorelease];
+  self.actionItem.enabled = (self.imageID != nil);
   
   return [NSArray arrayWithObjects:
-          [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(action:)] autorelease],
+          self.actionItem,
           [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
           [[[UIBarButtonItem alloc] initWithCustomView:textViews] autorelease],
           [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
-          [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCompose target:self action:@selector(edit:)] autorelease],
+          self.editNameItem,
           nil];
 }
 
@@ -196,6 +258,19 @@ enum
           [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
           nil];
 }
+
+- (ProgressTextBarView*)toolbarProgressView
+{
+  id view = [[[toolbar items] objectAtIndex:1] customView];
+  if ([view isKindOfClass:[ProgressTextBarView class]])
+  {
+    return view;
+  }
+  return nil;
+}
+
+#pragma mark -
+#pragma mark Keyboard Control
 
 - (void)didShowKeyboard:(NSNotification*)notification
 {
@@ -245,15 +320,20 @@ enum
   return NO;
 }
 
-- (ProgressTextBarView*)toolbarProgressView
+#pragma mark -
+#pragma mark Rotation
+
+- (void)deviceChangedOrientation:(NSNotification*)notification
 {
-  id view = [[[toolbar items] objectAtIndex:1] customView];
-  if ([view isKindOfClass:[ProgressTextBarView class]])
-  {
-    return view;
-  }
-  return nil;
+  [self.toolbar sizeToFit];
+  
+  CGRect toolbarFrame = self.toolbar.frame;
+  toolbarFrame.origin.y = CGRectGetHeight(self.view.frame) - toolbarFrame.size.height;
+  self.toolbar.frame = toolbarFrame;
 }
+
+#pragma mark -
+#pragma mark Upload Actions
 
 - (void)showUploadButton
 {
@@ -302,6 +382,35 @@ enum
   UIView *view = [[[toolbar items] objectAtIndex:1] customView];
   [view becomeFirstResponder];
 }
+
+- (IBAction)action:(id)sender
+{
+  UIActionSheet *sheet = [[[UIActionSheet alloc] initWithTitle:nil
+                                                      delegate:self
+                                             cancelButtonTitle:@"Dismiss" 
+                                        destructiveButtonTitle:nil
+                                             otherButtonTitles:@"Open in Safari", @"Copy Link", nil] autorelease];
+  [sheet showFromToolbar:toolbar];
+}
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+  NSString *title = [actionSheet buttonTitleAtIndex:buttonIndex];
+  NSString *galleryBaseURL = [[NSUserDefaults standardUserDefaults] valueForKey:@"gallery_url"];
+  NSString *url = [NSString stringWithFormat:@"%@?g2_itemId=%@", galleryBaseURL, self.imageID];
+  
+  if ([title isEqualToString:@"Open in Safari"])
+  {
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
+  }
+  else if ([title isEqualToString:@"Copy Link"])
+  {
+    [UIPasteboard generalPasteboard].URL = [NSURL URLWithString:url];
+  }
+}
+
+#pragma mark -
+#pragma mark Gallery Upload/Callbacks
 
 - (void)queueTagEvent:(NSNumber*)tag
 {
@@ -367,14 +476,10 @@ enum
     }
     case GalleryProgressUpload:
     {
-      NSString *itemID = [dictionary objectForKey:@"item_name"];
-      NSURLRequest *request = [gallery requestForCommandDictionary:[NSDictionary dictionaryWithObjectsAndKeys:itemID, @"id", @"image-properties", @"cmd", nil]];
-      [gallery beginAsyncRequest:request withTag:GalleryProgressFinishing];
-      break;
-    }
-    case GalleryProgressFinishing:
-    {        
-      NSLog(@"%@", dictionary);
+      self.imageID = [dictionary objectForKey:@"item_name"];
+      self.actionItem.enabled = (self.imageID != nil);
+      self.editNameItem.enabled = (self.imageID == nil);
+      
       [self showUploadButton];
       [toolbar setItems:normalToolbarArray animated:YES];
       break;
@@ -418,8 +523,8 @@ enum
 {
   if (buttonIndex == 1)
   {
-    UINavigationController *nav = [self navigationController];
-    [nav pushViewController:[[[iGallerySettingsController alloc] init] autorelease] animated:YES];
+    iGallerySettingsController *settingsController = [[[iGallerySettingsController alloc] initWithNibName:nil bundle:nil] autorelease];
+    [self.navigationController presentModalViewController:settingsController animated:YES];
   }
 }
 
@@ -435,34 +540,5 @@ enum
   }
   [self toolbarProgressView].progressView.progress = (PROGRESS_STEPS * 2.0) + ((2.0 * PROGRESS_STEPS) * ((float)uploadedBytes / (float)totalBytes));
 }
-
-// Implement viewDidLoad to do additional setup after loading the view.
-- (void)viewDidLoad {
-  [super viewDidLoad];
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation 
-{
-  return ((interfaceOrientation == UIInterfaceOrientationPortrait) || (interfaceOrientation == UIInterfaceOrientationLandscapeRight) || (interfaceOrientation == UIInterfaceOrientationLandscapeLeft));
-}
-
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning]; // Releases the view if it doesn't have a superview
-    // Release anything that's not essential, such as cached data
-}
-
-
-- (void)dealloc 
-{
-  [imageNameTextField release];
-  [uploadToolbarArray release];
-  [normalToolbarArray release];
-  [editToolbarArray release];
-  
-  [image release];
-  [super dealloc];
-}
-
 
 @end

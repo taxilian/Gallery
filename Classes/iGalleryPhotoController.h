@@ -20,7 +20,7 @@
 #import <UIKit/UIKit.h>
 #import "Gallery.h"
 
-@interface iGalleryPhotoController : UIViewController <UITextFieldDelegate> {
+@interface iGalleryPhotoController : UIViewController <UITextFieldDelegate, UIActionSheetDelegate> {
   Gallery *gallery;
   
   UIImage *image;
@@ -33,12 +33,15 @@
   NSArray *editToolbarArray;
   NSArray *uploadToolbarArray;
   
+  UIBarButtonItem *actionItem;
+  UIBarButtonItem *editNameItem;
   NSString *imageName;
+  NSString *imageID;
   
   int uploadedBytes;
   int totalBytes;
   
-  bool keyboardShown;
+  BOOL keyboardShown;
 }
 
 @property (nonatomic, retain) Gallery *gallery;
@@ -46,7 +49,10 @@
 @property (nonatomic, retain) UIImage *image;
 @property (nonatomic, retain) UIToolbar *toolbar;
 
+@property (nonatomic, retain) UIBarButtonItem *actionItem;
+@property (nonatomic, retain) UIBarButtonItem *editNameItem;
 @property (nonatomic, retain) NSString *imageName;
+@property (nonatomic, retain) NSString *imageID;
 
 #pragma mark Toolbar Generation
 
