@@ -68,7 +68,8 @@ enum
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didHideKeyboard:) name:@"UIKeyboardDidHideNotification" object:nil];
   
   self.title = @"Settings";
-  self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)];
+  self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismiss:)] autorelease];
+  self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease];
   
   self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
   self.tableView.backgroundColor = [UIColor groupTableViewBackgroundColor];
@@ -235,6 +236,11 @@ enum
 - (IBAction)connect:(id)sender
 {
   [self attemptGalleryUpdate];
+}
+                                           
+- (IBAction)dismiss:(id)sender
+{
+  [self.navigationController dismissModalViewControllerAnimated:YES];
 }
 
 #pragma mark Keyboard Notifications
@@ -524,7 +530,7 @@ enum
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     // Return YES for supported orientations
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+  return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
 

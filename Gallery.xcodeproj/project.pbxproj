@@ -20,7 +20,6 @@
 		C9574B6B0FA773850022254C /* NSArray+Extras.m in Sources */ = {isa = PBXBuildFile; fileRef = C9574B6A0FA773850022254C /* NSArray+Extras.m */; };
 		C9574C9E0FA7ABAC0022254C /* UIDevice+Extras.m in Sources */ = {isa = PBXBuildFile; fileRef = C9574C9D0FA7ABAC0022254C /* UIDevice+Extras.m */; };
 		C9574D9A0FA7CF530022254C /* NSData+Extras.m in Sources */ = {isa = PBXBuildFile; fileRef = C9574D990FA7CF530022254C /* NSData+Extras.m */; };
-		C9A314880F56972500D91A0E /* libPMAnalytics-r36.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A314870F56972500D91A0E /* libPMAnalytics-r36.a */; };
 		C9A3148C0F56974E00D91A0E /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A3148B0F56974E00D91A0E /* SystemConfiguration.framework */; };
 		C9A314900F56975000D91A0E /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A3148F0F56975000D91A0E /* CoreLocation.framework */; };
 		C9B90F410F8E379A00A5D0C4 /* libsqlite3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C9B90F400F8E379A00A5D0C4 /* libsqlite3.0.dylib */; };
@@ -33,6 +32,7 @@
 		C9CCE7070EDA996200E95000 /* iGallerySettingsController.m in Sources */ = {isa = PBXBuildFile; fileRef = C9CCE6FE0EDA996200E95000 /* iGallerySettingsController.m */; };
 		C9CCE7080EDA996200E95000 /* ProgressTextBarView.m in Sources */ = {isa = PBXBuildFile; fileRef = C9CCE7000EDA996200E95000 /* ProgressTextBarView.m */; };
 		C9CCE7090EDA996200E95000 /* UIImage+Extras.m in Sources */ = {isa = PBXBuildFile; fileRef = C9CCE7020EDA996200E95000 /* UIImage+Extras.m */; };
+		C9CE5F0D10193CD7008AFC57 /* libPMAnalytics-r64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C9CE5F0C10193CD7008AFC57 /* libPMAnalytics-r64.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,8 +58,6 @@
 		C9574C9D0FA7ABAC0022254C /* UIDevice+Extras.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIDevice+Extras.m"; sourceTree = "<group>"; };
 		C9574D980FA7CF530022254C /* NSData+Extras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Extras.h"; sourceTree = "<group>"; };
 		C9574D990FA7CF530022254C /* NSData+Extras.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Extras.m"; sourceTree = "<group>"; };
-		C9A314860F56972500D91A0E /* Beacon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Beacon.h; sourceTree = "<group>"; };
-		C9A314870F56972500D91A0E /* libPMAnalytics-r36.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libPMAnalytics-r36.a"; sourceTree = "<group>"; };
 		C9A3148B0F56974E00D91A0E /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		C9A3148F0F56975000D91A0E /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		C9B90F400F8E379A00A5D0C4 /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = usr/lib/libsqlite3.0.dylib; sourceTree = SDKROOT; };
@@ -79,6 +77,8 @@
 		C9CCE7000EDA996200E95000 /* ProgressTextBarView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgressTextBarView.m; sourceTree = "<group>"; };
 		C9CCE7010EDA996200E95000 /* UIImage+Extras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Extras.h"; sourceTree = "<group>"; };
 		C9CCE7020EDA996200E95000 /* UIImage+Extras.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Extras.m"; sourceTree = "<group>"; };
+		C9CE5F0B10193CD7008AFC57 /* Beacon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Beacon.h; sourceTree = "<group>"; };
+		C9CE5F0C10193CD7008AFC57 /* libPMAnalytics-r64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libPMAnalytics-r64.a"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,10 +90,10 @@
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */,
 				C9111BBD0EE46DF300614AE1 /* CFNetwork.framework in Frameworks */,
-				C9A314880F56972500D91A0E /* libPMAnalytics-r36.a in Frameworks */,
 				C9A3148C0F56974E00D91A0E /* SystemConfiguration.framework in Frameworks */,
 				C9A314900F56975000D91A0E /* CoreLocation.framework in Frameworks */,
 				C9B90F410F8E379A00A5D0C4 /* libsqlite3.0.dylib in Frameworks */,
+				C9CE5F0D10193CD7008AFC57 /* libPMAnalytics-r64.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -191,8 +191,8 @@
 		C9A314800F56970D00D91A0E /* Pinch */ = {
 			isa = PBXGroup;
 			children = (
-				C9A314860F56972500D91A0E /* Beacon.h */,
-				C9A314870F56972500D91A0E /* libPMAnalytics-r36.a */,
+				C9CE5F0B10193CD7008AFC57 /* Beacon.h */,
+				C9CE5F0C10193CD7008AFC57 /* libPMAnalytics-r64.a */,
 				C9B90F400F8E379A00A5D0C4 /* libsqlite3.0.dylib */,
 			);
 			path = Pinch;
@@ -335,7 +335,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "0DB4708B-63F1-47C5-A41C-153FBE87C2CD";
-				SDKROOT = iphoneos2.2.1;
+				SDKROOT = iphoneos3.0;
 			};
 			name = Debug;
 		};
@@ -349,7 +349,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = iphoneos2.2.1;
+				SDKROOT = iphoneos3.0;
 			};
 			name = Release;
 		};
@@ -364,7 +364,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "CD651D18-0C29-4661-A7A5-927DFFA1182C";
-				SDKROOT = iphoneos2.2.1;
+				SDKROOT = iphoneos3.0;
 			};
 			name = Appstore;
 		};
@@ -399,7 +399,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "47C975BF-5794-4757-BE68-D1533FD9A58B";
-				SDKROOT = iphoneos2.2.1;
+				SDKROOT = iphoneos3.0;
 			};
 			name = Distribution;
 		};

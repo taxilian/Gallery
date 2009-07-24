@@ -55,6 +55,7 @@
     self.galleryURL = url;
     self.delegate = aDelegate;
     
+    connection = nil;
     messageRef = nil;
     haveAttemptedHTTPAuth = NO;
   }
@@ -70,7 +71,11 @@
 {
   NSMutableDictionary *mutableFormData = [NSMutableDictionary dictionaryWithDictionary:dict];
   NSString *mimeBoundary = @"-----iGalleryMIMEBoundary123412341234121";
-  NSString *gURL = [NSString stringWithFormat:@"%@?g2_controller=remote:GalleryRemote", galleryURL];
+  NSString *gURL = galleryURL;
+  if ([gURL rangeOfString:@"?g2_controller=remote:GalleryRemote"].location == NSNotFound)
+  {
+    gURL = [gURL stringByAppendingString:@"?g2_controller=remote:GalleryRemote"];
+  }
   
   NSMutableData *cmdTokenData = [NSMutableData data];
   
@@ -204,128 +209,91 @@
   return [self beginAsyncRequest:request withTag:0];
 }
 
-- (BOOL)beginAsyncRequest:(NSURLRequest*)request withTag:(long)tag
+- (BOOL)beginAsyncRequest:(NSURLRequest*)request withTag:(long)theTag
 {
-  NSError *error;
-  socket = [[AsyncSocket alloc] initWithDelegate:self];
-  NSURL *url = [request URL];
-  int port = [[url port] intValue] != 0 ? [[url port] intValue] : 80;
-  
-  ConnLog(@"Begin request");
-  
-  if (![url host] || ![url scheme] || (port == 0))
+  connectionRequest = [request retain];
+  connection = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:NO];
+  if (!connection)
   {
-    if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didError:)])
-    {
-      [[self delegate] gallery:self didError:[NSError errorWithDomain:@"GalleryDomain" code:1002 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"Invalid Gallery URL provided.", NSLocalizedDescriptionKey, nil]]];
-    }
+    ConnLog(@"Invalid request");
     return NO;
   }
   
-  if ([socket connectToHost:[url host] onPort:port error:&error])
-  {
-    // Async socket works with NSData but we can't serialise the data out of the NSURLRequest because its not in the API
-    // so we're gonna have to copy the contents out, header by header into a CFHTTPMessageRef and then convert that to data.
-    messageRef = CFHTTPMessageCreateRequest(kCFAllocatorDefault, (CFStringRef)@"POST", (CFURLRef)url, kCFHTTPVersion1_1);
-    CFHTTPMessageSetHeaderFieldValue(messageRef, (CFStringRef)@"Host", (CFStringRef)[url host]);
-    CFHTTPMessageSetHeaderFieldValue(messageRef, (CFStringRef)@"User-Agent", (CFStringRef)@"Gallery Remote");
-    
-    NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookiesForURL:url];
-    NSDictionary *requestHeaders = [NSHTTPCookie requestHeaderFieldsWithCookies:cookies];
-    for (NSString *key in [requestHeaders allKeys])
-    {
-      CFHTTPMessageSetHeaderFieldValue(messageRef, (CFStringRef)key, (CFStringRef)[requestHeaders valueForKey:key]);
-    }
-    
-    for (NSString *key in [[request allHTTPHeaderFields] allKeys])
-    {
-      CFHTTPMessageSetHeaderFieldValue(messageRef, (CFStringRef)key, (CFStringRef)[[request allHTTPHeaderFields] valueForKey:key]);
-    }
-    CFHTTPMessageSetBody(messageRef, (CFDataRef)[request HTTPBody]);
-    NSData *data = [(NSData*)CFHTTPMessageCopySerializedMessage(messageRef) autorelease];
-    
-    CFRelease(messageRef);
-    messageRef = nil;
-    
-    uploadChunkSize = [data length] * 0.1;
-    NSData *firstChunk = [data subdataWithRange:NSMakeRange(0, uploadChunkSize)];
-    uploadData = [[data subdataWithRange:NSMakeRange(uploadChunkSize, [data length] - uploadChunkSize)] retain];
-    
-    // So we dont have a "tag" when we know we've disconnected from the remote host,
-    // so store it here so we can return it to the delegate later.
-    connectionTag = tag;
-    
-    [socket setUserData:uploadChunkSize];
-    [socket writeData:firstChunk withTimeout:CONNECTION_TIMEOUT tag:tag];
-    
-    // Keep this incase we need to retransmit
-    [lastRequest release];
-    lastRequest = [request retain];
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    ConnLog(@"Request started.");
-    return YES;
-  }
-  ConnLog(@"Failed to connect.");
-  return NO;
-}
-
-- (id)sendSynchronousCommand:(NSDictionary*)formData error:(NSError**)error
-{
-  [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-  NSURLRequest *request = [self requestForCommandDictionary:formData];
-  NSData *connectionData = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:error];
-  [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+  [connection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
+  connectionData = [[NSMutableData alloc] init];
+  connectionTag = theTag;
   
-  return [self commandDictionaryFromData:connectionData];
+  ConnLog(@"Begin request");
+  [connection start];
+  ConnLog(@"Request dispatched.");
+  return YES;
 }
 
 @end
 
 @implementation Gallery (GalleryPrivate)
 
-- (void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag
+- (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite
 {
-  // Tell our delegate that we've uploaded some data
-  if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didUploadBytes:bytesRemaining:withTag:)])
+  if (self.delegate && [self.delegate respondsToSelector:@selector(gallery:didUploadBytes:bytesRemaining:withTag:)])
   {
-    [[self delegate] gallery:self didUploadBytes:[sock userData] bytesRemaining:[uploadData length] withTag:tag];
-  }
-
-  if ([uploadData length] > 0)
-  {
-    // We've not completed the current upload yet, lets carry on
-    int chunkSize = MIN(uploadChunkSize, [uploadData length]);
-    NSData *nextChunk = [uploadData subdataWithRange:NSMakeRange(0, chunkSize)];
-    uploadData = [[[uploadData autorelease] subdataWithRange:NSMakeRange(chunkSize, [uploadData length] - chunkSize)] retain];
-    
-    [sock setUserData:chunkSize];
-    [sock writeData:nextChunk withTimeout:CONNECTION_TIMEOUT tag:tag];
-    ConnLog(@"Written data");
-  }
-  else
-  {
-    ConnLog(@"Data sent.");
-    // We've sent something, probably need to read the response now
-    [uploadData release];
-    uploadData = nil;
-    
-    [sock readDataWithTimeout:CONNECTION_TIMEOUT tag:tag];
-    ConnLog(@"Read started.");
+    [self.delegate gallery:self didUploadBytes:bytesWritten bytesRemaining:(totalBytesExpectedToWrite-totalBytesWritten) withTag:connectionTag];
   }
 }
 
-- (void)onSocket:(AsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag
+- (NSURLRequest *)connection:(NSURLConnection *)connection willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponse
 {
-  if (messageRef == nil)
+  if (redirectResponse)
   {
-    // I think we should have a nil whenever we're ready to start reading data...I hope.
-    messageRef = CFHTTPMessageCreateEmpty(kCFAllocatorDefault, NO);
+    NSMutableURLRequest *req = [connectionRequest mutableCopy];
+    [req setURL:[request URL]];
+    self.galleryURL = [request.URL absoluteString];
+    
+    return [req autorelease];
   }
-  CFHTTPMessageAppendBytes(messageRef, [data bytes], [data length]);
-  [sock readDataWithTimeout:CONNECTION_TIMEOUT tag:tag];
   
-  [sock disconnectAfterReadingAndWriting];
-  ConnLog(@"Data read.");
+  return request;
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
+{
+  [connectionData appendData:data];
+}
+
+- (void)connectionDidFinishLoading:(NSURLConnection *)aConnection
+{
+  NSDictionary *commandDict = [self commandDictionaryFromData:connectionData];
+  [connectionData release];
+  connectionData = nil;
+  connection = nil;
+  
+  if (commandDict && [self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didRecieveCommandDictionary:withTag:)])
+  {
+    [[self delegate] gallery:self didRecieveCommandDictionary:commandDict withTag:connectionTag];
+  }
+}
+
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)err
+{
+  if (err)
+  {
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    
+    if ([[err domain] isEqualToString:@"kCFStreamErrorDomainNetDB"])
+    {
+      switch ([err code])
+      {
+        case EAI_NONAME:
+          err = [NSError errorWithDomain:[err domain] code:[err code] userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"No internet connection found. Please try again.", NSLocalizedDescriptionKey, nil]];
+          break;
+      }
+    }
+    
+    if ([self delegate] && [[self delegate] respondsToSelector:@selector(gallery:didError:)])
+    {
+      [[self delegate] gallery:self didError:err];
+    }
+  }
 }
 
 - (void)onSocket:(AsyncSocket *)sock willDisconnectWithError:(NSError *)err

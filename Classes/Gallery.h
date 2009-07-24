@@ -24,6 +24,11 @@
 #define CONNECTION_TIMEOUT  30.0f
 
 @interface Gallery : NSObject {
+  NSURLRequest *connectionRequest;
+  NSURLConnection *connection;
+  NSMutableData *connectionData;
+  int tag;
+  
   AsyncSocket *socket;
   id delegate;
   
@@ -59,8 +64,6 @@
 
 - (BOOL)beginAsyncRequest:(NSURLRequest*)request;
 - (BOOL)beginAsyncRequest:(NSURLRequest*)request withTag:(long)tag;
-
-- (id)sendSynchronousCommand:(NSDictionary*)formData error:(NSError**)error;
 
 @end
 

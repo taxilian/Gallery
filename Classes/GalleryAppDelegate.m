@@ -55,9 +55,14 @@ extern const char * class_getName(Class cls);
   
   imagePickerController = [[ImagePicker alloc] init];
   imagePickerController.delegate = self;
+  imagePickerController.rotationAllowed = YES;
   
   [window addSubview:imagePickerController.view];
 	[window makeKeyAndVisible];
+}
+
+- (void)applicationWillTerminate:(UIApplication *)application {
+  [[Beacon shared] endBeacon];
 }
 
 - (IBAction)camera:(id)sender
@@ -67,8 +72,9 @@ extern const char * class_getName(Class cls);
 
 - (IBAction)settings:(id)sender
 {
-  iGallerySettingsController *settingsController = [[iGallerySettingsController alloc] init];
-  [imagePickerController pushViewController:settingsController animated:YES];
+  iGallerySettingsController *settingsController = [[[iGallerySettingsController alloc] initWithNibName:nil bundle:nil] autorelease];
+  UINavigationController *settingsNavController = [[[UINavigationController alloc] initWithRootViewController:settingsController] autorelease];
+  [imagePickerController presentModalViewController:settingsNavController animated:YES];
 }
 
 - (void)dealloc {
@@ -83,33 +89,6 @@ extern const char * class_getName(Class cls);
   if ([viewController isKindOfClass:[iGallerySettingsController class]])
   {
     [(iGallerySettingsController*)viewController update];
-  }
-  
-  if (![viewController isKindOfClass:[iGalleryPhotoController class]] && (viewController.interfaceOrientation != UIInterfaceOrientationPortrait))
-  {
-    // Ok, nasty hack. There is no official API way to do this, so I'm gonna resort to using the closed ones.
-    [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait animated:YES];
-    if ([[[UIApplication sharedApplication] keyWindow] respondsToSelector:@selector(forceUpdateInterfaceOrientation)])
-    {
-      [[[UIApplication sharedApplication] keyWindow] forceUpdateInterfaceOrientation];
-    }
-  }
-  
-  // Some 3.0 UIView hacks
-  if ([[UIDevice currentDevice] isVersionThreePointOS])
-  {
-    if ((!strcmp(class_getName([viewController class]), "PLUILibraryViewController")) ||
-        (!strcmp(class_getName([viewController class]), "PLUIAlbumViewController")))
-    {
-      UIScrollView *scrollView = (UIScrollView*)[self subViewOf:viewController.view atIndex:0 ofClass:[UITableView class]];
-      UIEdgeInsets insets = [scrollView contentInset];
-      
-      if (insets.top >= 64.0)
-      {
-        insets.top -= 64.0f;
-        [scrollView setContentInset:insets];
-      }
-    }
   }
 }
 
@@ -139,12 +118,12 @@ extern const char * class_getName(Class cls);
   else if ([viewController isKindOfClass:[iGallerySettingsController class]] ||
            [viewController isKindOfClass:[iGalleryAlbumController class]])
   {
-    [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait animated:YES];
+    //[[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait animated:YES];
     navigationController.navigationBar.barStyle = UIBarStyleBlackOpaque;
   }
   else
   {
-    [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait animated:YES];
+    //[[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait animated:YES];
     navigationController.navigationBar.barStyle = UIBarStyleBlackOpaque;
     [UIView beginAnimations:nil context:nil];
     [UIView setAnimationDuration:0.25];
@@ -160,7 +139,8 @@ extern const char * class_getName(Class cls);
 {
   CGRect iPhoneBounds = [[UIScreen mainScreen] bounds];
   
-  if ([[UIApplication sharedApplication] statusBarOrientation] == UIInterfaceOrientationLandscapeRight)
+  if (([[UIApplication sharedApplication] statusBarOrientation] == UIInterfaceOrientationLandscapeRight) ||
+      ([[UIApplication sharedApplication] statusBarOrientation] == UIInterfaceOrientationLandscapeLeft))
   {
     float w = iPhoneBounds.size.height;
     float h = iPhoneBounds.size.width;
@@ -248,6 +228,12 @@ extern const char * class_getName(Class cls);
   if (index < [subViewArray count])
   {
     return [subViewArray objectAtIndex:index];
+  }
+  
+  // oh crap
+  for (UIView *subview in view.subviews)
+  {
+    NSLog(@"%@", subview);
   }
   
   [[NSException exceptionWithName:@"SubviewNotFound" reason:@"Requested subview not found in view." userInfo:nil] raise];

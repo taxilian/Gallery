@@ -44,17 +44,22 @@
   [super viewDidLoad];
 }
 
-// Override to allow orientations other than the default portrait orientation.
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-  // Return YES for supported orientations
-  if (rotationAllowed)
-  {
-    return ((interfaceOrientation == UIInterfaceOrientationPortrait) ||
-            (interfaceOrientation == UIInterfaceOrientationLandscapeRight) ||
-            (interfaceOrientation == UIInterfaceOrientationLandscapeLeft));
-  }
-  return (interfaceOrientation == UIInterfaceOrientationPortrait);
+- (BOOL)_isSupportedInterfaceOrientation:(int)fp8
+{
+  return [self shouldAutorotateToInterfaceOrientation:fp8];
 }
+
+// Override to allow orientations other than the default portrait orientation.
+//- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+//  // Return YES for supported orientations
+//  if (rotationAllowed)
+//  {
+//    return ((interfaceOrientation == UIInterfaceOrientationPortrait) ||
+//            (interfaceOrientation == UIInterfaceOrientationLandscapeRight) ||
+//            (interfaceOrientation == UIInterfaceOrientationLandscapeLeft));
+//  }
+//  return (interfaceOrientation == UIInterfaceOrientationPortrait);
+//}
 
 
 - (void)didReceiveMemoryWarning {

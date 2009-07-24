@@ -29,7 +29,8 @@ enum
   GalleryProgressLogin,
   GalleryProgressRotate,
   GalleryProgressStartUpload,
-  GalleryProgressUpload
+  GalleryProgressUpload,
+  GalleryProgressFinishing,
 };
 
 @interface iGalleryPhotoController (Private)
@@ -152,7 +153,7 @@ enum
   space.width = 20;
   
   return [NSArray arrayWithObjects:
-          space,
+          [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(action:)] autorelease],
           [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
           [[[UIBarButtonItem alloc] initWithCustomView:textViews] autorelease],
           [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease],
@@ -366,6 +367,14 @@ enum
     }
     case GalleryProgressUpload:
     {
+      NSString *itemID = [dictionary objectForKey:@"item_name"];
+      NSURLRequest *request = [gallery requestForCommandDictionary:[NSDictionary dictionaryWithObjectsAndKeys:itemID, @"id", @"image-properties", @"cmd", nil]];
+      [gallery beginAsyncRequest:request withTag:GalleryProgressFinishing];
+      break;
+    }
+    case GalleryProgressFinishing:
+    {        
+      NSLog(@"%@", dictionary);
       [self showUploadButton];
       [toolbar setItems:normalToolbarArray animated:YES];
       break;
