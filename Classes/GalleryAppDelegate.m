@@ -44,7 +44,8 @@ extern const char * class_getName(Class cls);
 @synthesize backgroundImageView;
 @synthesize rootViewController;
 
-- (void)applicationDidFinishLaunching:(UIApplication *)application {
+- (void)applicationDidFinishLaunching:(UIApplication *)application
+{
   [Beacon initAndStartBeaconWithApplicationCode:@"7cb67f8268de949c106fdcd678419d7e" useCoreLocation:NO useOnlyWiFi:NO];
   
   application.statusBarStyle = UIStatusBarStyleBlackTranslucent;
@@ -74,6 +75,7 @@ extern const char * class_getName(Class cls);
 {
   iGallerySettingsController *settingsController = [[[iGallerySettingsController alloc] initWithNibName:nil bundle:nil] autorelease];
   UINavigationController *settingsNavController = [[[UINavigationController alloc] initWithRootViewController:settingsController] autorelease];
+  settingsNavController.navigationBar.barStyle = UIBarStyleBlackOpaque;
   [imagePickerController presentModalViewController:settingsNavController animated:YES];
 }
 
@@ -103,11 +105,11 @@ extern const char * class_getName(Class cls);
     navigationController.navigationBar.barStyle = UIBarStyleBlackOpaque;
     
     // Blank placeholder, gets replaced (yeah, wasteful, whatever), with a camera item if we have a camera available.
-    viewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Settings" style:UIBarButtonItemStylePlain target:self action:@selector(settings:)];
-    viewController.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+    viewController.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Settings" style:UIBarButtonItemStylePlain target:self action:@selector(settings:)] autorelease];
+    viewController.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease];
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
     {
-      viewController.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(camera:)];
+      viewController.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(camera:)] autorelease];
     }
   }
   else if ([viewController isKindOfClass:[iGalleryPhotoController class]])
