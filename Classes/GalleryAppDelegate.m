@@ -165,15 +165,6 @@ extern const char * class_getName(Class cls);
 {
   [self autosizeBackgroundImage:image];
   
-  if (picker.sourceType == UIImagePickerControllerSourceTypeCamera)
-  {
-    picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-    self.rootViewController = nil;
-    
-    // Save the image out to the device
-    UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
-  }
-  
   iGalleryPhotoController *photoController = [[[iGalleryPhotoController alloc] initWithNibName:nil bundle:nil] autorelease];
   photoController.image = image;
   
@@ -183,6 +174,15 @@ extern const char * class_getName(Class cls);
   [UIView commitAnimations];
   
   [imagePickerController pushViewController:photoController animated:YES];
+  
+  if (picker.sourceType == UIImagePickerControllerSourceTypeCamera)
+  {
+    picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    self.rootViewController = nil;
+    
+    // Save the image out to the device
+    UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
+  }
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
@@ -209,52 +209,6 @@ extern const char * class_getName(Class cls);
       break;
   }
   [self autosizeBackgroundImage:backgroundImageView.image];
-}
-
-#pragma mark Subview Drilling Functions
-
-- (UIView*)subViewOf:(UIView*)view atIndex:(int)index ofClass:(Class)aClass
-{
-  NSMutableArray *subViewArray = [NSMutableArray array];
-  
-  for (UIView *subview in view.subviews)
-  {
-    if ([subview isKindOfClass:aClass])
-    {
-      [subViewArray addObject:subview];
-    }
-  }
-  
-  if (index < [subViewArray count])
-  {
-    return [subViewArray objectAtIndex:index];
-  }
-  
-  // oh crap
-  for (UIView *subview in view.subviews)
-  {
-    NSLog(@"%@", subview);
-  }
-  
-  [[NSException exceptionWithName:@"SubviewNotFound" reason:@"Requested subview not found in view." userInfo:nil] raise];
-  return nil;
-}
-
-#pragma mark Debug Functions
-
-- (void)_printUIViewTree:(UIView*)view
-{
-  [self _printUIViewTree:view withPrefixWhitespace:@""];
-}
-
-- (void)_printUIViewTree:(UIView*)view withPrefixWhitespace:(NSString*)whitespace
-{
-  NSLog(@"%@View: %@, %@", whitespace, view, NSStringFromCGRect([view frame]));
-  for (UIView *subView in [view subviews])
-  {
-    [self _printUIViewTree:subView withPrefixWhitespace:[whitespace stringByAppendingString:@"\t"]];
-  }
-  NSLog(@"%@ViewEnd: %@", whitespace, view);
 }
 
 @end
