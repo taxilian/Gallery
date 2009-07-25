@@ -21,6 +21,7 @@
 
 #import "iGalleryAlbumController.h"
 #import "CQPreferencesTextCell.h"
+#import "MWTextFieldCell.h"
 
 #import "NSArray+Extras.h"
 
@@ -66,6 +67,7 @@ enum
   
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didShowKeyboard:) name:@"UIKeyboardDidShowNotification" object:nil];
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didHideKeyboard:) name:@"UIKeyboardDidHideNotification" object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textFieldTextDidChangeNotification:) name:UITextFieldTextDidChangeNotification object:nil];
   
   self.title = @"Settings";
   self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismiss:)] autorelease];
@@ -297,57 +299,58 @@ enum
   {
     case 0:
     {
-      CQPreferencesTextCell *cell = (CQPreferencesTextCell*)[aTableView dequeueReusableCellWithIdentifier:@"CQPreferencesTextCell"];
+      MWTextFieldCell *cell = (MWTextFieldCell*)[aTableView dequeueReusableCellWithIdentifier:@"MWTextFieldCell"];
       if (!cell)
       {
-        cell = [[CQPreferencesTextCell alloc] initWithFrame:CGRectZero reuseIdentifier:@"CQPreferencesTextCell"];
+        cell = [[[MWTextFieldCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"MWTextFieldCell"] autorelease];
       }
       
-      [cell setLabel:@"URL"];
-      [cell setPlaceholder:@"http://www.somewhere.com/main.php"];
-      [cell setKeyboardType:UIKeyboardTypeURL];
-      [cell setAutocorrectionType:UITextAutocorrectionTypeNo];
-      [cell setAutocapitalizationType:UITextAutocapitalizationTypeNone];
+      cell.textLabel.text = @"URL";
+      cell.verticalDivider = 115.0f;
       
-      [[cell textField] setDelegate:self];
-      [[cell textField] setReturnKeyType:UIReturnKeyDone];
-      [[cell textField] setTag:urlTAG];
-      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textFieldTextDidChangeNotification:) name:UITextFieldTextDidChangeNotification object:[cell textField]];
+      cell.textField.placeholder = @"http://www.somewhere.com/main.php";
+      cell.textField.keyboardType = UIKeyboardTypeURL;
+      cell.textField.autocorrectionType = UITextAutocorrectionTypeNo;
+      cell.textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
+      cell.textField.returnKeyType = UIReturnKeyDone;
+      cell.textField.delegate = self; 
+      cell.textField.tag = urlTAG;
       
-      [cell setText:[[NSUserDefaults standardUserDefaults] stringForKey:@"gallery_url"]];
-
+      cell.textField.text = [[NSUserDefaults standardUserDefaults] stringForKey:@"gallery_url"];
+      
       return cell;
     }
     
     // U/P group
     case 1:
     {
-      CQPreferencesTextCell *cell = (CQPreferencesTextCell*)[aTableView dequeueReusableCellWithIdentifier:@"CQPreferencesTextCell"];
+      MWTextFieldCell *cell = (MWTextFieldCell*)[aTableView dequeueReusableCellWithIdentifier:@"MWTextFieldCell"];
       if (!cell)
       {
-        cell = [[CQPreferencesTextCell alloc] initWithFrame:CGRectZero reuseIdentifier:@"CQPreferencesTextCell"];
+        cell = [[[MWTextFieldCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"MWTextFieldCell"] autorelease];
       }
+      
       NSArray *rowNames = [NSArray arrayWithObjects:@"Username", @"Password", nil];
       
-      [cell setLabel:[rowNames objectAtIndex:[indexPath indexAtPosition:1]]];
-      [cell setPlaceholder:[rowNames objectAtIndex:[indexPath indexAtPosition:1]]];
-      [cell setAutocorrectionType:UITextAutocorrectionTypeNo];
-      [cell setAutocapitalizationType:UITextAutocapitalizationTypeNone];
+      cell.textLabel.text = [rowNames objectAtIndex:[indexPath indexAtPosition:1]];
+      cell.verticalDivider = 115.0f;
 
-      [[cell textField] setDelegate:self];
-      [[cell textField] setReturnKeyType:UIReturnKeyDone];
-      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textFieldTextDidChangeNotification:) name:UITextFieldTextDidChangeNotification object:[cell textField]];
+      cell.textField.placeholder = [[rowNames objectAtIndex:[indexPath indexAtPosition:1]] lowercaseString];
+      cell.textField.autocorrectionType = UITextAutocorrectionTypeNo;
+      cell.textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
+      cell.textField.returnKeyType = UIReturnKeyDone;
+      cell.textField.delegate = self;
       
       switch ([indexPath indexAtPosition:1])
       {
         case 0:
-          [cell setText:[[NSUserDefaults standardUserDefaults] stringForKey:@"username"]];
-          [[cell textField] setTag:usernameTAG];
+          cell.textField.text = [[NSUserDefaults standardUserDefaults] stringForKey:@"username"];
+          cell.textField.tag = usernameTAG;
           break;          
         case 1:
-          [cell setSecureTextEntry:YES];
-          [cell setText:[[NSUserDefaults standardUserDefaults] stringForKey:@"password"]];
-          [[cell textField] setTag:passwordTAG];
+          cell.textField.secureTextEntry = YES;
+          cell.textField.text = [[NSUserDefaults standardUserDefaults] stringForKey:@"password"];
+          cell.textField.tag = passwordTAG;
           break;
         default:
           break;
@@ -358,18 +361,18 @@ enum
       
     case 2:
     {
-      UITableViewCell *cell = [aTableView dequeueReusableCellWithIdentifier:@"UITableViewCell"];
+      UITableViewCell *cell = [aTableView dequeueReusableCellWithIdentifier:@"AlbumNameCell"];
       if (!cell)
       {
-        cell = [[UITableViewCell alloc] initWithFrame:CGRectZero reuseIdentifier:@"UITableViewCell"];
+        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AlbumNameCell"] autorelease];
       }
       
-      //cell.textAlignment = UITextAlignmentRight;
-      cell.font = [UIFont systemFontOfSize:17.];
-      cell.textColor = [UIColor colorWithRed:0.235294117647059 green:0.341176470588235 blue:0.545098039215686 alpha:1.];
+      cell.textLabel.textAlignment = UITextAlignmentRight;
+      cell.textLabel.font = [UIFont systemFontOfSize:17.];
+      cell.textLabel.textColor = [UIColor textEntryColor];
       cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
       
-      cell.text = ([[NSUserDefaults standardUserDefaults] valueForKey:@"albumTitle"]) ? [[NSUserDefaults standardUserDefaults] valueForKey:@"albumTitle"] : @"None";
+      cell.textLabel.text = ([[NSUserDefaults standardUserDefaults] valueForKey:@"albumTitle"]) ? [[NSUserDefaults standardUserDefaults] valueForKey:@"albumTitle"] : @"None";
       
       if (showLoadingIndicator)
       {
@@ -540,8 +543,10 @@ enum
 }
 
 
-- (void)dealloc {
-    [super dealloc];
+- (void)dealloc 
+{
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [super dealloc];
 }
 
 

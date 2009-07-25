@@ -20,6 +20,8 @@
 		C9574B6B0FA773850022254C /* NSArray+Extras.m in Sources */ = {isa = PBXBuildFile; fileRef = C9574B6A0FA773850022254C /* NSArray+Extras.m */; };
 		C9574C9E0FA7ABAC0022254C /* UIDevice+Extras.m in Sources */ = {isa = PBXBuildFile; fileRef = C9574C9D0FA7ABAC0022254C /* UIDevice+Extras.m */; };
 		C9574D9A0FA7CF530022254C /* NSData+Extras.m in Sources */ = {isa = PBXBuildFile; fileRef = C9574D990FA7CF530022254C /* NSData+Extras.m */; };
+		C97A188B101BBA0D00000E96 /* MWTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C97A188A101BBA0D00000E96 /* MWTextFieldCell.m */; };
+		C97A18F8101BCFE900000E96 /* MWTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C97A18F7101BCFE900000E96 /* MWTableViewCell.m */; };
 		C9A3148C0F56974E00D91A0E /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A3148B0F56974E00D91A0E /* SystemConfiguration.framework */; };
 		C9A314900F56975000D91A0E /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A3148F0F56975000D91A0E /* CoreLocation.framework */; };
 		C9B90F410F8E379A00A5D0C4 /* libsqlite3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C9B90F400F8E379A00A5D0C4 /* libsqlite3.0.dylib */; };
@@ -58,6 +60,10 @@
 		C9574C9D0FA7ABAC0022254C /* UIDevice+Extras.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIDevice+Extras.m"; sourceTree = "<group>"; };
 		C9574D980FA7CF530022254C /* NSData+Extras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Extras.h"; sourceTree = "<group>"; };
 		C9574D990FA7CF530022254C /* NSData+Extras.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Extras.m"; sourceTree = "<group>"; };
+		C97A1889101BBA0D00000E96 /* MWTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MWTextFieldCell.h; sourceTree = "<group>"; };
+		C97A188A101BBA0D00000E96 /* MWTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MWTextFieldCell.m; sourceTree = "<group>"; };
+		C97A18F6101BCFE900000E96 /* MWTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MWTableViewCell.h; sourceTree = "<group>"; };
+		C97A18F7101BCFE900000E96 /* MWTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MWTableViewCell.m; sourceTree = "<group>"; };
 		C9A3148B0F56974E00D91A0E /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		C9A3148F0F56975000D91A0E /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		C9B90F400F8E379A00A5D0C4 /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = usr/lib/libsqlite3.0.dylib; sourceTree = SDKROOT; };
@@ -105,6 +111,10 @@
 			children = (
 				C9CCE6F50EDA996200E95000 /* CQPreferencesTextCell.h */,
 				C9CCE6F60EDA996200E95000 /* CQPreferencesTextCell.m */,
+				C97A18F6101BCFE900000E96 /* MWTableViewCell.h */,
+				C97A18F7101BCFE900000E96 /* MWTableViewCell.m */,
+				C97A1889101BBA0D00000E96 /* MWTextFieldCell.h */,
+				C97A188A101BBA0D00000E96 /* MWTextFieldCell.m */,
 				C9CCE6F70EDA996200E95000 /* Gallery.h */,
 				C9CCE6F80EDA996200E95000 /* Gallery.m */,
 				C9CCE6F90EDA996200E95000 /* iGalleryAlbumController.h */,
@@ -275,6 +285,8 @@
 				C9574B6B0FA773850022254C /* NSArray+Extras.m in Sources */,
 				C9574C9E0FA7ABAC0022254C /* UIDevice+Extras.m in Sources */,
 				C9574D9A0FA7CF530022254C /* NSData+Extras.m in Sources */,
+				C97A188B101BBA0D00000E96 /* MWTextFieldCell.m in Sources */,
+				C97A18F8101BCFE900000E96 /* MWTableViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
