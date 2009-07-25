@@ -61,6 +61,12 @@
 //  return (interfaceOrientation == UIInterfaceOrientationPortrait);
 //}
 
+- (void)viewWillAppear:(BOOL)animated
+{
+  [super viewWillAppear:animated];
+  self.navigationBar.barStyle = UIBarStyleBlackOpaque;
+}
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning]; // Releases the view if it doesn't have a superview
