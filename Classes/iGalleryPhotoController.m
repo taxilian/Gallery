@@ -142,7 +142,6 @@ enum
 
 - (void)dealloc 
 {
-  NSLog(@"dealloc");
   self.gallery = nil;
   
   self.image = nil;
