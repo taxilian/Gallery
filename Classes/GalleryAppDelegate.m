@@ -21,7 +21,6 @@
 #import "iGalleryPhotoController.h"
 #import "iGallerySettingsController.h"
 #import "iGalleryAlbumController.h"
-
 #import "UIDevice+Extras.h"
 
 extern const char * class_getName(Class cls);
@@ -165,6 +164,15 @@ extern const char * class_getName(Class cls);
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingImage:(UIImage *)image editingInfo:(NSDictionary *)editingInfo
 {
+  if (picker.sourceType == UIImagePickerControllerSourceTypeCamera)
+  {
+    picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    self.rootViewController = nil;
+
+    // Save the image out to the device
+    UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
+  }
+
   [self autosizeBackgroundImage:image];
   
   iGalleryPhotoController *photoController = [[[iGalleryPhotoController alloc] initWithNibName:nil bundle:nil] autorelease];
@@ -175,16 +183,11 @@ extern const char * class_getName(Class cls);
   backgroundImageView.image = image;
   [UIView commitAnimations];
   
-  [imagePickerController pushViewController:photoController animated:YES];
+  // try togglign the status bar to get it back
+  [[UIApplication sharedApplication] setStatusBarHidden:YES animated:NO];
+  [[UIApplication sharedApplication] setStatusBarHidden:NO animated:NO];
   
-  if (picker.sourceType == UIImagePickerControllerSourceTypeCamera)
-  {
-    picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-    self.rootViewController = nil;
-    
-    // Save the image out to the device
-    UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
-  }
+  [imagePickerController pushViewController:photoController animated:YES];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker

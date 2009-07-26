@@ -20,7 +20,6 @@
 #import "iGallerySettingsController.h"
 
 #import "iGalleryAlbumController.h"
-#import "CQPreferencesTextCell.h"
 #import "MWTextFieldCell.h"
 
 #import "NSArray+Extras.h"
@@ -490,8 +489,8 @@ enum
   
   if ([textField isDescendantOfView:[tableView viewWithTag:urlTAG]])
   {
-    CQPreferencesTextCell *cell = (CQPreferencesTextCell*)[tableView viewWithTag:urlTAG];
-    NSString *cellString = [cell.text copy];
+    MWTextFieldCell *cell = (MWTextFieldCell*)[tableView viewWithTag:urlTAG];
+    NSString *cellString = [cell.textField.text copy];
     
     if (![cellString isEqualToString:@""])
     {
@@ -501,13 +500,13 @@ enum
   }
   else if ([textField isDescendantOfView:[tableView viewWithTag:usernameTAG]])
   {
-    CQPreferencesTextCell *cell = (CQPreferencesTextCell*)[tableView viewWithTag:usernameTAG];
-    [[NSUserDefaults standardUserDefaults] setValue:cell.text forKey:@"username"];
+    MWTextFieldCell *cell = (MWTextFieldCell*)[tableView viewWithTag:usernameTAG];
+    [[NSUserDefaults standardUserDefaults] setValue:cell.textField.text forKey:@"username"];
   }
   else if ([textField isDescendantOfView:[tableView viewWithTag:passwordTAG]])
   {
-    CQPreferencesTextCell *cell = (CQPreferencesTextCell*)[tableView viewWithTag:passwordTAG];
-    [[NSUserDefaults standardUserDefaults] setValue:cell.text forKey:@"password"];
+    MWTextFieldCell *cell = (MWTextFieldCell*)[tableView viewWithTag:passwordTAG];
+    [[NSUserDefaults standardUserDefaults] setValue:cell.textField.text forKey:@"password"];
   }
   else
   {

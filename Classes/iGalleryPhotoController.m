@@ -349,6 +349,7 @@ enum
 {
   [toolbar setItems:uploadToolbarArray animated:YES];
   [self showProgressIndicator];
+  [self toolbarProgressView].progressView.progress = 0.0f;
   
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   NSString *galleryUsername = [defaults valueForKey:@"username"];
@@ -459,7 +460,7 @@ enum
     }
     case GalleryProgressRotate:
     {
-      self.image = [image rotateImage];
+      //self.image = [image rotateImage];
       [self toolbarProgressView].textField.text = [NSString stringWithFormat:@"Uploading..."];
       [self performSelector:@selector(queueTagEvent:) withObject:[NSNumber numberWithInt:GalleryProgressStartUpload] afterDelay:0.0];
       break;

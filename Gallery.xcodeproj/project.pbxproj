@@ -27,7 +27,6 @@
 		C9B90F410F8E379A00A5D0C4 /* libsqlite3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C9B90F400F8E379A00A5D0C4 /* libsqlite3.0.dylib */; };
 		C9C0FE740EDAA0800017E2FD /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = C9C0FE730EDAA0800017E2FD /* Icon.png */; };
 		C9C99F2A0EDB2C1B00299CCD /* Entitlements.plist in Resources */ = {isa = PBXBuildFile; fileRef = C9C99F290EDB2C1B00299CCD /* Entitlements.plist */; };
-		C9CCE7030EDA996200E95000 /* CQPreferencesTextCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C9CCE6F60EDA996200E95000 /* CQPreferencesTextCell.m */; };
 		C9CCE7040EDA996200E95000 /* Gallery.m in Sources */ = {isa = PBXBuildFile; fileRef = C9CCE6F80EDA996200E95000 /* Gallery.m */; };
 		C9CCE7050EDA996200E95000 /* iGalleryAlbumController.m in Sources */ = {isa = PBXBuildFile; fileRef = C9CCE6FA0EDA996200E95000 /* iGalleryAlbumController.m */; };
 		C9CCE7060EDA996200E95000 /* iGalleryPhotoController.m in Sources */ = {isa = PBXBuildFile; fileRef = C9CCE6FC0EDA996200E95000 /* iGalleryPhotoController.m */; };
@@ -69,8 +68,6 @@
 		C9B90F400F8E379A00A5D0C4 /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = usr/lib/libsqlite3.0.dylib; sourceTree = SDKROOT; };
 		C9C0FE730EDAA0800017E2FD /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		C9C99F290EDB2C1B00299CCD /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Entitlements.plist; sourceTree = "<group>"; };
-		C9CCE6F50EDA996200E95000 /* CQPreferencesTextCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CQPreferencesTextCell.h; sourceTree = "<group>"; };
-		C9CCE6F60EDA996200E95000 /* CQPreferencesTextCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CQPreferencesTextCell.m; sourceTree = "<group>"; };
 		C9CCE6F70EDA996200E95000 /* Gallery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Gallery.h; sourceTree = "<group>"; };
 		C9CCE6F80EDA996200E95000 /* Gallery.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Gallery.m; sourceTree = "<group>"; };
 		C9CCE6F90EDA996200E95000 /* iGalleryAlbumController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iGalleryAlbumController.h; sourceTree = "<group>"; };
@@ -109,8 +106,6 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				C9CCE6F50EDA996200E95000 /* CQPreferencesTextCell.h */,
-				C9CCE6F60EDA996200E95000 /* CQPreferencesTextCell.m */,
 				C97A18F6101BCFE900000E96 /* MWTableViewCell.h */,
 				C97A18F7101BCFE900000E96 /* MWTableViewCell.m */,
 				C97A1889101BBA0D00000E96 /* MWTextFieldCell.h */,
@@ -273,7 +268,6 @@
 			files = (
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* GalleryAppDelegate.m in Sources */,
-				C9CCE7030EDA996200E95000 /* CQPreferencesTextCell.m in Sources */,
 				C9CCE7040EDA996200E95000 /* Gallery.m in Sources */,
 				C9CCE7050EDA996200E95000 /* iGalleryAlbumController.m in Sources */,
 				C9CCE7060EDA996200E95000 /* iGalleryPhotoController.m in Sources */,
