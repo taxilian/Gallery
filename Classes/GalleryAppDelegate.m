@@ -196,6 +196,10 @@ extern const char * class_getName(Class cls);
   {
     picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     self.rootViewController = nil;
+    
+    // try togglign the status bar to get it back
+    [[UIApplication sharedApplication] setStatusBarHidden:YES animated:NO];
+    [[UIApplication sharedApplication] setStatusBarHidden:NO animated:NO];
   }
 }
 
