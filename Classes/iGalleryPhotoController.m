@@ -111,7 +111,11 @@ enum
   // Generate an image name based on the current date
   NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
   [dateFormatter setDateFormat:@"ddMMyy-HHmm"];
-  self.imageName = [NSString stringWithFormat:@"iPhone-%@.jpg", [[dateFormatter stringFromDate:[NSDate date]] stringByReplacingOccurrencesOfString:@" " withString:@""]];
+  self.imageName = [NSString stringWithFormat:@"iPhone-%@", [[dateFormatter stringFromDate:[NSDate date]] stringByReplacingOccurrencesOfString:@" " withString:@""]];
+  if ([[NSUserDefaults standardUserDefaults] boolForKey:@"appendjpg"])
+  {
+    self.imageName = [self.imageName stringByAppendingString:@".jpg"];
+  }
   
   // Lets get the size of the toolbar as default.
   [toolbar sizeToFit];
@@ -306,9 +310,9 @@ enum
     // Generate an image name based on the current date
     NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
     [dateFormatter setDateFormat:@"ddMMyy-HHmm"];
-    self.imageName = [NSString stringWithFormat:@"iPhone-%@.jpg", [[dateFormatter stringFromDate:[NSDate date]] stringByReplacingOccurrencesOfString:@" " withString:@""]];
+    self.imageName = [NSString stringWithFormat:@"iPhone-%@", [[dateFormatter stringFromDate:[NSDate date]] stringByReplacingOccurrencesOfString:@" " withString:@""]];
   }
-  if (![[self.imageName substringWithRange:NSMakeRange([self.imageName length] - 4, 4)] isEqualToString:@".jpg"])
+  if ([[NSUserDefaults standardUserDefaults] boolForKey:@"appendjpg"] && (![[self.imageName substringWithRange:NSMakeRange([self.imageName length] - 4, 4)] isEqualToString:@".jpg"]))
   {
     self.imageName = [self.imageName stringByAppendingString:@".jpg"];
   }
@@ -460,7 +464,10 @@ enum
     }
     case GalleryProgressRotate:
     {
-      //self.image = [image rotateImage];
+      if ([[NSUserDefaults standardUserDefaults] boolForKey:@"autorotate"])
+      {
+        self.image = [image rotateImage];
+      }
       [self toolbarProgressView].textField.text = [NSString stringWithFormat:@"Uploading..."];
       [self performSelector:@selector(queueTagEvent:) withObject:[NSNumber numberWithInt:GalleryProgressStartUpload] afterDelay:0.0];
       break;

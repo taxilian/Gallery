@@ -27,6 +27,8 @@
 #define urlTAG 1
 #define usernameTAG 2
 #define passwordTAG 3
+#define autorotateTAG 4
+#define appendjpgTAG 5
 
 NSString *const IGSettingsDidChangeNotification = @"IGSettingsDidChangeNotification";
 
@@ -72,10 +74,14 @@ enum
   self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismiss:)] autorelease];
   self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(connect:)] autorelease];
   
-  self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
+  CGRect tableViewBounds = self.view.bounds;
+  tableViewBounds.size.height -= self.navigationController.navigationBar.frame.size.height;
+  
+  self.tableView = [[UITableView alloc] initWithFrame:tableViewBounds style:UITableViewStyleGrouped];
   self.tableView.backgroundColor = [UIColor groupTableViewBackgroundColor];
   self.tableView.dataSource = self;
   self.tableView.delegate = self;
+  self.tableView.scrollEnabled = YES;
   
   self.gallery = [[Gallery alloc] initWithGalleryURL:nil delegate:self];
   
@@ -390,6 +396,36 @@ enum
       return cell;
     }
       
+    case 3:
+    {
+      UITableViewCell *cell = [aTableView dequeueReusableCellWithIdentifier:@"SettingSwitchCell"];
+      if (!cell)
+      {
+        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"SettingSwitchCell"] autorelease];
+      }
+      
+      // switches ignore .size
+      UISwitch *aSwitch = [[[UISwitch alloc] initWithFrame:CGRectMake(198.0, 8.0, 0.0, 0.0)] autorelease];
+      [aSwitch addTarget:self action:@selector(switchChanged:) forControlEvents:UIControlEventValueChanged];
+      cell.accessoryView = aSwitch;
+      
+      switch (indexPath.row)
+      {
+        case 0:
+          cell.textLabel.text = @"Auto-Rotate Images";
+          aSwitch.tag = autorotateTAG;
+          aSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:@"autorotate"];
+          break;
+        case 1:
+          cell.textLabel.text = @"Add .jpg to Images";
+          aSwitch.tag = appendjpgTAG;
+          aSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:@"appendjpg"];
+          break;
+      }
+      
+      return cell;
+    }
+      
     default:
     {
       UITableViewCell *cell = [aTableView dequeueReusableCellWithIdentifier:@"UITableViewCell"];
@@ -429,7 +465,7 @@ enum
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-  return 3;
+  return 4;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -444,6 +480,8 @@ enum
       return 2;
     case 2:
       return 1;
+    case 3:
+      return 2;
     default:
       return 0;
   }
@@ -458,6 +496,8 @@ enum
       return @"Authentication";
     case 2:
       return @"Upload Album";
+    case 3:
+      return @"Settings";
     default:
       return nil;
   }
@@ -468,9 +508,9 @@ enum
   switch (section)
   {
     case 0:
-      return @"You should include the /main.php at the\nend of the address.";
     case 1:
     case 2:
+    case 3:
     default:
       return nil;
   }
@@ -481,16 +521,44 @@ enum
   [self.tableView reloadData];
 }
 
+#pragma mark UISwitch action
+
+- (void)switchChanged:(UISwitch*)sender
+{
+  switch ([sender tag])
+  {
+    case autorotateTAG:
+    {
+      [[NSUserDefaults standardUserDefaults] setBool:sender.on forKey:@"autorotate"];
+      if (sender.on)
+      {
+        UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Auto-Rotate"
+                                                         message:@"Enabling auto-rotate will strip all EXIF data from your photos.\n\nIf you would prefer this not to the case then disable this option and enable \"Rotate pictures automatically\" in the \"EXIF/IPTC\" section of your gallery site admin."
+                                                        delegate:nil
+                                               cancelButtonTitle:@"Dismiss"
+                                               otherButtonTitles:nil] autorelease];
+        [alert show];
+      }
+      break;
+    }
+    case appendjpgTAG:
+    {
+      [[NSUserDefaults standardUserDefaults] setBool:sender.on forKey:@"appendjpg"];
+      break;
+    }
+  }
+  [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
 #pragma mark Textview Delegates
 
 - (void)textFieldTextDidChangeNotification:(NSNotification*)notification
 {
   UITextField *textField = [notification object];
   
-  if ([textField isDescendantOfView:[tableView viewWithTag:urlTAG]])
+  if ([textField tag] == urlTAG)
   {
-    MWTextFieldCell *cell = (MWTextFieldCell*)[tableView viewWithTag:urlTAG];
-    NSString *cellString = [cell.textField.text copy];
+    NSString *cellString = [textField.text copy];
     
     if (![cellString isEqualToString:@""])
     {
@@ -498,15 +566,13 @@ enum
     }
     [[NSUserDefaults standardUserDefaults] setValue:cellString forKey:@"gallery_url"];
   }
-  else if ([textField isDescendantOfView:[tableView viewWithTag:usernameTAG]])
+  else if ([textField tag] == usernameTAG)
   {
-    MWTextFieldCell *cell = (MWTextFieldCell*)[tableView viewWithTag:usernameTAG];
-    [[NSUserDefaults standardUserDefaults] setValue:cell.textField.text forKey:@"username"];
+    [[NSUserDefaults standardUserDefaults] setValue:textField.text forKey:@"username"];
   }
-  else if ([textField isDescendantOfView:[tableView viewWithTag:passwordTAG]])
+  else if ([textField tag] == passwordTAG)
   {
-    MWTextFieldCell *cell = (MWTextFieldCell*)[tableView viewWithTag:passwordTAG];
-    [[NSUserDefaults standardUserDefaults] setValue:cell.textField.text forKey:@"password"];
+    [[NSUserDefaults standardUserDefaults] setValue:textField.text forKey:@"password"];
   }
   else
   {
