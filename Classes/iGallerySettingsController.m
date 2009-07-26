@@ -310,6 +310,7 @@ enum
         cell = [[[MWTextFieldCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"MWTextFieldCell"] autorelease];
       }
       
+      cell.selectionStyle = UITableViewCellSelectionStyleNone;
       cell.textLabel.text = @"URL";
       cell.verticalDivider = 115.0f;
       
@@ -318,6 +319,7 @@ enum
       cell.textField.autocorrectionType = UITextAutocorrectionTypeNo;
       cell.textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
       cell.textField.returnKeyType = UIReturnKeyDone;
+      cell.textField.clearButtonMode = UITextFieldViewModeWhileEditing;
       cell.textField.delegate = self; 
       cell.textField.tag = urlTAG;
       
@@ -337,6 +339,7 @@ enum
       
       NSArray *rowNames = [NSArray arrayWithObjects:@"Username", @"Password", nil];
       
+      cell.selectionStyle = UITableViewCellSelectionStyleNone;
       cell.textLabel.text = [rowNames objectAtIndex:[indexPath indexAtPosition:1]];
       cell.verticalDivider = 115.0f;
 
@@ -344,6 +347,7 @@ enum
       cell.textField.autocorrectionType = UITextAutocorrectionTypeNo;
       cell.textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
       cell.textField.returnKeyType = UIReturnKeyDone;
+      cell.textField.clearButtonMode = UITextFieldViewModeWhileEditing;
       cell.textField.delegate = self;
       
       switch ([indexPath indexAtPosition:1])
@@ -407,7 +411,9 @@ enum
       // switches ignore .size
       UISwitch *aSwitch = [[[UISwitch alloc] initWithFrame:CGRectMake(198.0, 8.0, 0.0, 0.0)] autorelease];
       [aSwitch addTarget:self action:@selector(switchChanged:) forControlEvents:UIControlEventValueChanged];
+      
       cell.accessoryView = aSwitch;
+      cell.selectionStyle = UITableViewCellSelectionStyleNone;
       
       switch (indexPath.row)
       {
