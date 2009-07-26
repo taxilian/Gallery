@@ -257,9 +257,35 @@
   return request;
 }
 
+- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+  if ([challenge proposedCredential])
+  {
+    // we've tried this once already, bomb out and let it fail
+    [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
+  }
+  else
+  {
+    // grab the u/p for the gallery and try that
+    NSURLCredential *credential = [NSURLCredential credentialWithUser:self.username password:self.password persistence:NSURLCredentialPersistenceForSession];
+    [[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
+  }
+}
+
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
   [connectionData appendData:data];
+}
+
+- (void)connection:(NSURLConnection *)aConnection didReceiveResponse:(NSHTTPURLResponse *)response
+{
+  if ([response statusCode] > 299)
+  {
+    NSString *desc = [NSString stringWithFormat:@"The webserver returned the following error: \"%d %@\"", [response statusCode], [[NSHTTPURLResponse localizedStringForStatusCode:[response statusCode]] capitalizedString]];
+    NSError *httpError = [NSError errorWithDomain:NSOSStatusErrorDomain code:[response statusCode] userInfo:[NSDictionary dictionaryWithObjectsAndKeys:desc, NSLocalizedDescriptionKey, nil]];
+    [self connection:aConnection didFailWithError:httpError];
+    [aConnection cancel];
+  }
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)aConnection
