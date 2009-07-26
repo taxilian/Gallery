@@ -30,10 +30,13 @@
 # define ConnLog(x, ...)
 #endif
 
+@interface NSURLRequest (SomePrivateAPIs)
++ (BOOL)allowsAnyHTTPSCertificateForHost:(id)fp8;
++ (void)setAllowsAnyHTTPSCertificate:(BOOL)fp8 forHost:(id)fp12;
+@end
+
 @interface Gallery (GalleryPrivate)
-
 - (void)onSocket:(AsyncSocket *)sock didWriteDataWithTag:(long)tag;
-
 @end
 
 @implementation Gallery
@@ -141,6 +144,7 @@
   [request setValue:[NSString stringWithFormat:@"multipart/form-data; boundary=%@", mimeBoundary] forHTTPHeaderField:@"Content-Type"];
   [request setHTTPMethod:@"POST"];
   [request setHTTPBody:cmdTokenData];
+  [NSURLRequest setAllowsAnyHTTPSCertificate:YES forHost:[[request URL] host]];
   
   // Already autoreleased
   return request;

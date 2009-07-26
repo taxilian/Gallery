@@ -495,7 +495,7 @@ enum
     
     if (![cellString isEqualToString:@""])
     {
-      cellString = ([cellString rangeOfString:@"http://"].location == NSNotFound) ? [@"http://" stringByAppendingString:cellString] : cellString;
+      cellString = (([cellString rangeOfString:@"http://"].location == NSNotFound) && ([cellString rangeOfString:@"https://"].location == NSNotFound)) ? [@"http://" stringByAppendingString:cellString] : cellString;
     }
     [[NSUserDefaults standardUserDefaults] setValue:cellString forKey:@"gallery_url"];
   }
