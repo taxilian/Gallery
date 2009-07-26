@@ -64,7 +64,7 @@
   }
   
   NSDictionary *rowDictionary = [tableItems objectAtIndex:[indexPath indexAtPosition:1]];
-  cell.text = [rowDictionary objectForKey:@"title"];
+  cell.textLabel.text = [rowDictionary objectForKey:@"title"];
   if ([[NSUserDefaults standardUserDefaults] objectForKey:@"albumID"])
   {
     if ([[rowDictionary objectForKey:@"name"] isEqual:[[NSUserDefaults standardUserDefaults] objectForKey:@"albumID"]])
