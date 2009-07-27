@@ -74,6 +74,9 @@
   CGRectDivide(self.contentView.frame, &leftSide, &rightSide, self.textLabel.frame.size.width, CGRectMinXEdge);
   
   textField.frame = CGRectMake(rightSide.origin.x, self.textLabel.frame.origin.y, rightSide.size.width - 20.f, self.textLabel.frame.size.height);
+  
+  // make sure we don't draw on a fractional point
+  textField.center = CGPointMake(ceilf(textField.center.x), ceilf(textField.center.y));
 }
 
 @end
